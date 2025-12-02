@@ -574,7 +574,7 @@ try {
 
     // ======= STEP 2: BURN depositForBurn =======
     async function burnUSDC(amount, recipient) {
-        setProgress(30, 'Queimando USDC (depositForBurn)...');
+        setProgress(30, 'Burning USDC (depositForBurn)...');
         updateStepStatus('step2','pending');
         try {
             const messenger = new ethers.Contract(CONFIG.ARC.TOKEN_MESSENGER, TOKEN_MESSENGER_ABI, signer);
@@ -584,19 +584,18 @@ try {
             const mintRecipient = ethers.utils.hexZeroPad(recipientChecksum, 32);
             const destinationCaller = ethers.constants.HashZero;
             
-            // IMPORTANT: Arc Testnet is in the list of chains where Fast Transfer is NOT applicable
-            // as source chain because attestation times are already very fast.
-            // Use minFinalityThreshold = 2000 for Standard Transfer
-            // maxFee should be set appropriately for Standard Transfer fees
-            const maxFee = ethers.utils.parseUnits('0.1', tokenDecimals); // 0.1 USDC max fee
-            const minFinalityThreshold = 2000; // Standard Transfer (finalized)
+            // IMPORTANT: For testnet, maxFee should be 0 (no fee)
+            // For mainnet, use actual fee from Circle API
+            // maxFee must be <= amount being transferred
+            const maxFee = 0; // Testnet: no fee required
+            const minFinalityThreshold = 1000; // Fast Transfer (confirmed)
             
             console.log('Burn parameters:');
             console.log('- Amount:', amountUnits.toString());
             console.log('- Destination Domain:', CONFIG.SEPOLIA.DOMAIN);
             console.log('- Mint Recipient:', mintRecipient);
             console.log('- Burn Token:', CONFIG.ARC.USDC);
-            console.log('- Max Fee:', maxFee.toString());
+            console.log('- Max Fee:', maxFee);
             console.log('- Min Finality Threshold:', minFinalityThreshold);
 
             // attempt estimateGas
@@ -611,13 +610,13 @@ try {
                     maxFee,
                     minFinalityThreshold
                 );
-                const gasLimit = estimated.mul(130).div(100); // +30%
+                const gasLimit = estimated.mul(150).div(100); // +50% buffer
                 console.log('Estimated gas:', estimated.toString());
                 tx = await messenger.depositForBurn(amountUnits, CONFIG.SEPOLIA.DOMAIN, mintRecipient, CONFIG.ARC.USDC, destinationCaller, maxFee, minFinalityThreshold, { gasLimit });
             } catch (estErr) {
                 // fallback: send with high gasLimit to obtain revert reason if any
                 console.warn('estimateGas failed, sending with high gasLimit', estErr);
-                tx = await messenger.depositForBurn(amountUnits, CONFIG.SEPOLIA.DOMAIN, mintRecipient, CONFIG.ARC.USDC, destinationCaller, maxFee, minFinalityThreshold, { gasLimit: 900000 });
+                tx = await messenger.depositForBurn(amountUnits, CONFIG.SEPOLIA.DOMAIN, mintRecipient, CONFIG.ARC.USDC, destinationCaller, maxFee, minFinalityThreshold, { gasLimit: 500000 });
             }
 
             setProgress(40, 'Transação enviada: ' + tx.hash + ' — aguardando receipt...');
@@ -707,7 +706,7 @@ try {
                             params: [{
                                 chainId: CONFIG.SEPOLIA.CHAIN_ID_HEX,
                                 chainName: 'Sepolia Testnet',
-                                rpcUrls: ['https://rpc.sepolia.org', 'https://sepolia.drpc.org', 'https://ethereum-sepolia-rpc.publicnode.com'],
+                                rpcUrls: ['https://1rpc.io/sepolia', 'https://eth-sepolia.public.blastapi.io', 'https://rpc2.sepolia.org'],
                                 nativeCurrency: { name:'Sepolia ETH', symbol:'ETH', decimals: 18 },
                                 blockExplorerUrls: ['https://sepolia.etherscan.io']
                             }]
@@ -716,7 +715,7 @@ try {
                         await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{ chainId: CONFIG.SEPOLIA.CHAIN_ID_HEX }] });
                     } catch (addErr) {
                         // If user rejected or another error, show helpful message
-                        throw new Error('Please add Sepolia network to your wallet manually:\n\nNetwork: Sepolia Testnet\nRPC: https://rpc.sepolia.org\nChain ID: 11155111\nSymbol: ETH\nExplorer: https://sepolia.etherscan.io\n\nAfter adding, click "Start Bridge" again.');
+                        throw new Error('Please add Sepolia network to your wallet manually:\n\nNetwork: Sepolia Testnet\nRPC: https://1rpc.io/sepolia\nChain ID: 11155111\nSymbol: ETH\nExplorer: https://sepolia.etherscan.io\n\nAfter adding, click "Start Bridge" again.');
                     }
                 } else if (swErr.code === 4001) {
                     throw new Error('Network switch rejected. Please approve the network switch to continue.');
