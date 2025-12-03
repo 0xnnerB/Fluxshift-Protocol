@@ -835,45 +835,54 @@
         hideErrorBox();
         try {
             if (!window.ethereum) { alert('Instale MetaMask ou Rabby!'); return; }
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            await provider.send('eth_requestAccounts', []);
-            signer = provider.getSigner();
-            userAddress = await signer.getAddress();
-            // switch to Arc if needed
-            const net = await provider.getNetwork();
-            if (net.chainId !== CONFIG.ARC.CHAIN_ID) {
+            
+            // Request account access
+            await window.ethereum.request({ method: 'eth_requestAccounts' });
+            
+            // Determine which network to connect based on bridge direction
+            const targetConfig = (bridgeDirection === 'arc-to-sepolia') ? CONFIG.ARC : CONFIG.SEPOLIA;
+            const targetChainId = targetConfig.CHAIN_ID;
+            const targetChainIdHex = targetConfig.CHAIN_ID_HEX;
+            
+            // Check current chain and switch if needed
+            const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+            if (currentChainId !== targetChainIdHex) {
                 try {
-                    await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{ chainId: CONFIG.ARC.CHAIN_ID_HEX }] });
+                    await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{ chainId: targetChainIdHex }] });
                 } catch (swErr) {
                     if (swErr.code === 4902) {
+                        // Add network if not exists
+                        const chainParams = (bridgeDirection === 'arc-to-sepolia') ? {
+                            chainId: CONFIG.ARC.CHAIN_ID_HEX,
+                            chainName: CONFIG.ARC.NAME,
+                            rpcUrls: [CONFIG.ARC.RPC],
+                            nativeCurrency: { name:'tUSDC', symbol:'USDC', decimals: 18 },
+                            blockExplorerUrls: [CONFIG.ARC.EXPLORER]
+                        } : {
+                            chainId: CONFIG.SEPOLIA.CHAIN_ID_HEX,
+                            chainName: 'Sepolia Testnet',
+                            rpcUrls: ['https://1rpc.io/sepolia'],
+                            nativeCurrency: { name:'Sepolia ETH', symbol:'ETH', decimals: 18 },
+                            blockExplorerUrls: ['https://sepolia.etherscan.io']
+                        };
                         await window.ethereum.request({
                             method: 'wallet_addEthereumChain',
-                            params: [{
-                                chainId: CONFIG.ARC.CHAIN_ID_HEX,
-                                chainName: CONFIG.ARC.NAME,
-                                rpcUrls: [CONFIG.ARC.RPC],
-                                nativeCurrency: { name:'tUSDC', symbol:'USDC', decimals: 18 },
-                                blockExplorerUrls: [CONFIG.ARC.EXPLORER]
-                            }]
+                            params: [chainParams]
                         });
                     } else throw swErr;
                 }
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                signer = provider.getSigner();
+                // Wait for network switch
+                await new Promise(r => setTimeout(r, 500));
             }
+            
+            // ALWAYS create fresh provider and signer after network is confirmed
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = provider.getSigner();
+            userAddress = await signer.getAddress();
 
-            // detect decimals and USDC balance
-const usdcRead = new ethers.Contract(CONFIG.ARC.USDC, USDC_ABI, provider);
-try {
-    // many ERC-20 USDC implementations expose 6 decimals for token amounts
-    const detected = await usdcRead.decimals();
-    // force ERC-20 USDC behaviour to 6 decimals for approve/parseUnits etc.
-    tokenDecimals = (Number(detected) === 6) ? 6 : 6; // use 6 for ERC-20 USDC interface
-    // NOTE: if you ever need to treat native gas accounting separate from ERC-20 token units,
-    // create a separate var like `erc20Decimals` vs `nativeDecimals`.
-} catch(e) {
-    tokenDecimals = 6; // default to 6 for USDC ERC-20
-}
+            // Get USDC balance for the source network
+            const usdcRead = new ethers.Contract(targetConfig.USDC, USDC_ABI, provider);
+            tokenDecimals = 6; // USDC always 6 decimals
             const balRaw = await usdcRead.balanceOf(userAddress);
             const balPretty = ethers.utils.formatUnits(balRaw, tokenDecimals);
 
@@ -881,7 +890,7 @@ try {
             $('connectWalletBtn').classList.add('hidden');
             $('walletInfo').classList.remove('hidden');
             $('walletAddress').textContent = userAddress;
-            $('walletBalance').textContent = 'Balance (native token): ' + balPretty + ' USDC';
+            $('walletBalance').textContent = 'Balance on ' + targetConfig.NAME + ': ' + balPretty + ' USDC';
             $('availableBalance').textContent = parseFloat(balPretty).toFixed(6);
 
             // Show wallet indicator in top right (abbreviated address)
@@ -1217,13 +1226,17 @@ try {
 
     // ======= STEP 1: APPROVE (SEPOLIA) =======
     async function approveUSDC_Sepolia(amount) {
-        setProgress(10, 'Switching to Sepolia...');
+        setProgress(10, 'Preparing Sepolia connection...');
         updateStepStatus('step1', 'pending');
         
-        // First ensure we're on Sepolia
         try {
+            // ALWAYS refresh provider first to avoid "network changed" errors
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            
+            // Ensure we're on Sepolia
             const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
             if (currentChainId !== CONFIG.SEPOLIA.CHAIN_ID_HEX) {
+                setProgress(10, 'Switching to Sepolia...');
                 try {
                     await window.ethereum.request({
                         method: 'wallet_switchEthereumChain',
@@ -1247,12 +1260,21 @@ try {
                     }
                 }
                 await new Promise(r => setTimeout(r, 1000));
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                signer = provider.getSigner();
             }
+            
+            // ALWAYS recreate provider and signer after ensuring correct network
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = provider.getSigner();
+            
+            // Verify network
+            const network = await provider.getNetwork();
+            if (network.chainId !== CONFIG.SEPOLIA.CHAIN_ID) {
+                throw new Error('Failed to connect to Sepolia. Please switch manually.');
+            }
+            
         } catch (e) {
             updateStepStatus('step1','error');
-            throw new Error('Failed to switch to Sepolia: ' + (e?.message || e));
+            throw new Error('Failed to connect to Sepolia: ' + (e?.message || e));
         }
         
         setProgress(15, 'Approving USDC on Sepolia...');
