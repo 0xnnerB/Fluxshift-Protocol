@@ -98,6 +98,14 @@
 
     <div class="max-w-7xl mx-auto relative z-10 p-4 md:p-6">
         
+        <!-- Pending Action Indicator (next to wallet) -->
+        <div id="pendingIndicator" class="hidden fixed top-4 right-44 z-50 cursor-pointer" onclick="showPendingModal()">
+            <div class="flex items-center gap-2 px-3 py-2 bg-orange-500/20 backdrop-blur-sm rounded-full border border-orange-500/50 hover:bg-orange-500/30 transition-all">
+                <div class="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                <span class="text-orange-300 text-xs font-semibold">Action needed</span>
+            </div>
+        </div>
+        
         <!-- Wallet indicator (top right) -->
         <div id="walletIndicator" class="hidden fixed top-4 right-4 z-50">
             <div class="flex items-center gap-2 px-3 py-2 bg-slate-900/90 backdrop-blur-sm rounded-full border border-purple-500/30">
@@ -226,41 +234,45 @@
                 </div>
 
                 <div id="bridgeForm" class="hidden space-y-6">
-                    <!-- Network selector - New elegant design -->
+                    <!-- Network selector - Bidirectional with swap button -->
                     <div class="bg-slate-900/50 rounded-2xl p-4 border border-slate-700/50">
                         <div class="flex items-center justify-between">
-                            <!-- Arc Network -->
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-purple-500/20">
-                                    <img src="data:image/webp;base64,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" class="w-full h-full object-cover" alt="Arc">
+                            <!-- Source Network -->
+                            <div id="sourceNetwork" class="flex items-center gap-3">
+                                <div id="sourceIcon" class="w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-purple-500/20">
+                                    <img id="sourceImg" src="data:image/webp;base64,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" class="w-full h-full object-cover" alt="Arc">
                                 </div>
                                 <div>
                                     <p class="text-gray-400 text-xs">From</p>
-                                    <p class="text-white font-semibold">Arc Testnet</p>
+                                    <p id="sourceName" class="text-white font-semibold">Arc Testnet</p>
                                 </div>
                             </div>
                             
-                            <!-- Arrow -->
+                            <!-- Swap Button -->
                             <div class="flex items-center px-4">
-                                <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center border border-slate-600">
-                                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                <button id="swapNetworksBtn" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center border border-purple-500/50 transition-all hover:scale-110 hover:border-purple-400 cursor-pointer" title="Swap networks">
+                                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
                                     </svg>
-                                </div>
+                                </button>
                             </div>
                             
-                            <!-- Sepolia Network -->
-                            <div class="flex items-center gap-3">
+                            <!-- Destination Network -->
+                            <div id="destNetwork" class="flex items-center gap-3">
                                 <div>
                                     <p class="text-gray-400 text-xs text-right">To</p>
-                                    <p class="text-white font-semibold">Sepolia</p>
+                                    <p id="destName" class="text-white font-semibold">Sepolia</p>
                                 </div>
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                <div id="destIcon" class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
                                     <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M11.944 17.97L4.58 13.62 11.943 24l7.37-10.38-7.372 4.35h.003zM12.056 0L4.69 12.223l7.365 4.354 7.365-4.35L12.056 0z"/>
                                     </svg>
                                 </div>
                             </div>
+                        </div>
+                        <!-- Direction indicator -->
+                        <div class="mt-3 text-center">
+                            <span id="directionText" class="text-xs text-gray-500">Arc Testnet → Sepolia</span>
                         </div>
                     </div>
 
@@ -292,10 +304,27 @@
                     </div>
 
                     <div class="space-y-3">
-                        <div id="step1" class="p-3 rounded-lg border border-gray-700 bg-slate-900/20 flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">1</div><span class="text-gray-400 flex-1">Approve USDC</span><span id="step1status" class="text-xs"></span></div>
-                        <div id="step2" class="p-3 rounded-lg border border-gray-700 bg-slate-900/20 flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">2</div><span class="text-gray-400 flex-1">Burn USDC on Arc</span><span id="step2status" class="text-xs"></span></div>
-                        <div id="step3" class="p-3 rounded-lg border border-gray-700 bg-slate-900/20 flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">3</div><span class="text-gray-400 flex-1">Waiting for Attestation</span><span id="step3status" class="text-xs"></span></div>
-                        <div id="step4" class="p-3 rounded-lg border border-gray-700 bg-slate-900/20 flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">4</div><span class="text-gray-400 flex-1">Mint USDC on Sepolia</span><span id="step4status" class="text-xs"></span></div>
+                        <div id="step1" class="p-3 rounded-lg border border-gray-700 bg-slate-900/20 flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">1</div><span id="step1text" class="text-gray-400 flex-1">Approve USDC</span><span id="step1status" class="text-xs"></span></div>
+                        <div id="step2" class="p-3 rounded-lg border border-gray-700 bg-slate-900/20 flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">2</div><span id="step2text" class="text-gray-400 flex-1">Burn USDC on Arc</span><span id="step2status" class="text-xs"></span></div>
+                        <div id="step3" class="p-3 rounded-lg border border-gray-700 bg-slate-900/20 flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">3</div><span id="step3text" class="text-gray-400 flex-1">Waiting for Attestation</span><span id="step3status" class="text-xs"></span></div>
+                        <div id="step4" class="p-3 rounded-lg border border-gray-700 bg-slate-900/20 flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">4</div><span id="step4text" class="text-gray-400 flex-1">Mint USDC on Sepolia</span><span id="step4status" class="text-xs"></span></div>
+                    </div>
+                    
+                    <!-- Estimated time display -->
+                    <div id="estimatedTime" class="hidden text-center p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                        <p class="text-blue-300 text-sm">⏱️ Estimated wait: <span id="timeRemaining" class="font-bold">~25 min</span></p>
+                        <p class="text-gray-500 text-xs mt-1">You can leave this page - your transaction will be saved</p>
+                    </div>
+                    
+                    <!-- Manual Mint Button (appears when attestation is ready) -->
+                    <div id="mintReadySection" class="hidden">
+                        <div class="p-4 bg-green-500/10 border border-green-500/30 rounded-lg text-center">
+                            <p class="text-green-300 font-semibold mb-3">✅ Attestation Ready!</p>
+                            <p class="text-gray-400 text-sm mb-4">Click below to complete the mint on the destination chain</p>
+                            <button id="manualMintBtn" onclick="executeManualMint()" class="w-full px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:opacity-90 transition-all text-lg">
+                                🪙 Complete Mint
+                            </button>
+                        </div>
                     </div>
 
                     <div id="successMessage" class="hidden p-4 bg-green-500/10 border border-green-500/30 rounded-lg"><p class="text-green-300 font-semibold text-center">✅ Bridge completed successfully!</p></div>
@@ -305,6 +334,26 @@
             </div>
         </div>
         </div> <!-- End of centered content -->
+        
+        <!-- Pending Transactions Modal -->
+        <div id="pendingModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+            <div class="bg-slate-900 rounded-2xl p-6 border border-purple-500/30 max-w-md w-full mx-4 shadow-2xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-white font-bold text-lg">Pending Transactions</h3>
+                    <button onclick="hidePendingModal()" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div id="pendingList" class="space-y-3 max-h-80 overflow-y-auto">
+                    <!-- Pending transactions will be listed here -->
+                </div>
+                <div id="noPendingMsg" class="hidden text-center py-8">
+                    <p class="text-gray-500">No pending transactions</p>
+                </div>
+            </div>
+        </div>
 
         <div class="fixed bottom-4 left-4">
             <p class="text-gray-600 text-xs font-light">From community to community S2</p>
@@ -380,7 +429,224 @@
     let provider = null;
     let signer = null;
     let userAddress = null;
-    let tokenDecimals = 18;
+    let tokenDecimals = 6; // USDC ERC-20 uses 6 decimals
+    
+    // Bridge direction: 'arc-to-sepolia' or 'sepolia-to-arc'
+    let bridgeDirection = 'arc-to-sepolia';
+    
+    // Current pending transaction data (for manual mint)
+    let currentPendingTx = null;
+    
+    // Network icons HTML
+    const ARC_ICON_IMG = `<img src="data:image/webp;base64,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" class="w-full h-full object-cover" alt="Arc">`;
+    const SEPOLIA_ICON_SVG = `<svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 17.97L4.58 13.62 11.943 24l7.37-10.38-7.372 4.35h.003zM12.056 0L4.69 12.223l7.365 4.354 7.365-4.35L12.056 0z"/></svg>`;
+
+    // ======= PENDING TRANSACTIONS STORAGE =======
+    const STORAGE_KEY = 'fluxshift_pending_txs';
+    
+    function savePendingTx(tx) {
+        try {
+            const pending = getPendingTxs();
+            pending.push(tx);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(pending));
+            updatePendingIndicator();
+        } catch (e) { console.warn('Error saving pending tx:', e); }
+    }
+    
+    function getPendingTxs() {
+        try {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        } catch (e) { return []; }
+    }
+    
+    function removePendingTx(burnTxHash) {
+        try {
+            const pending = getPendingTxs().filter(tx => tx.burnTxHash !== burnTxHash);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(pending));
+            updatePendingIndicator();
+        } catch (e) { console.warn('Error removing pending tx:', e); }
+    }
+    
+    function updatePendingTx(burnTxHash, updates) {
+        try {
+            const pending = getPendingTxs();
+            const idx = pending.findIndex(tx => tx.burnTxHash === burnTxHash);
+            if (idx >= 0) {
+                pending[idx] = { ...pending[idx], ...updates };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(pending));
+            }
+            updatePendingIndicator();
+        } catch (e) { console.warn('Error updating pending tx:', e); }
+    }
+    
+    function updatePendingIndicator() {
+        const pending = getPendingTxs();
+        const readyTxs = pending.filter(tx => tx.status === 'ready_to_mint');
+        if (readyTxs.length > 0) {
+            $('pendingIndicator').classList.remove('hidden');
+        } else {
+            $('pendingIndicator').classList.add('hidden');
+        }
+    }
+    
+    function showPendingModal() {
+        const pending = getPendingTxs();
+        const listEl = $('pendingList');
+        const noMsgEl = $('noPendingMsg');
+        
+        if (pending.length === 0) {
+            listEl.classList.add('hidden');
+            noMsgEl.classList.remove('hidden');
+        } else {
+            listEl.classList.remove('hidden');
+            noMsgEl.classList.add('hidden');
+            
+            listEl.innerHTML = pending.map(tx => {
+                const direction = tx.direction === 'arc-to-sepolia' ? 'Arc → Sepolia' : 'Sepolia → Arc';
+                const statusColor = tx.status === 'ready_to_mint' ? 'green' : 'yellow';
+                const statusText = tx.status === 'ready_to_mint' ? 'Ready to Mint' : 'Waiting Attestation';
+                const timeAgo = getTimeAgo(tx.timestamp);
+                
+                return `
+                    <div class="p-3 bg-slate-800/50 rounded-lg border border-${statusColor}-500/30">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-white font-medium text-sm">${tx.amount} USDC</span>
+                            <span class="text-${statusColor}-400 text-xs">${statusText}</span>
+                        </div>
+                        <p class="text-gray-500 text-xs">${direction}</p>
+                        <p class="text-gray-600 text-xs">${timeAgo}</p>
+                        ${tx.status === 'ready_to_mint' ? `
+                            <button onclick="resumeMint('${tx.burnTxHash}')" class="mt-2 w-full px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-all">
+                                🪙 Complete Mint
+                            </button>
+                        ` : `
+                            <button onclick="checkAttestation('${tx.burnTxHash}')" class="mt-2 w-full px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-all">
+                                🔄 Check Status
+                            </button>
+                        `}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        $('pendingModal').classList.remove('hidden');
+    }
+    
+    function hidePendingModal() {
+        $('pendingModal').classList.add('hidden');
+    }
+    
+    function getTimeAgo(timestamp) {
+        const seconds = Math.floor((Date.now() - timestamp) / 1000);
+        if (seconds < 60) return 'Just now';
+        if (seconds < 3600) return Math.floor(seconds / 60) + ' min ago';
+        if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
+        return Math.floor(seconds / 86400) + ' days ago';
+    }
+    
+    // Resume mint from pending tx
+    async function resumeMint(burnTxHash) {
+        hidePendingModal();
+        const pending = getPendingTxs();
+        const tx = pending.find(t => t.burnTxHash === burnTxHash);
+        if (!tx || tx.status !== 'ready_to_mint') {
+            alert('Transaction not ready for mint');
+            return;
+        }
+        
+        // Make sure wallet is connected
+        if (!userAddress) {
+            await connectWallet();
+        }
+        
+        // Set current pending tx and show progress UI
+        currentPendingTx = tx;
+        bridgeDirection = tx.direction;
+        updateNetworkUI();
+        
+        // Show bridge tab and progress
+        $('bridgeTab').click();
+        $('bridgeForm').classList.add('hidden');
+        $('bridgeProgress').classList.remove('hidden');
+        
+        // Set UI state to step 4
+        updateStepStatus('step1', 'completed');
+        updateStepStatus('step2', 'completed');
+        updateStepStatus('step3', 'completed');
+        setProgress(75, 'Attestation ready - click to mint');
+        
+        // Show mint button
+        $('mintReadySection').classList.remove('hidden');
+        $('estimatedTime').classList.add('hidden');
+    }
+    
+    // Check attestation status for a pending tx
+    async function checkAttestation(burnTxHash) {
+        const pending = getPendingTxs();
+        const tx = pending.find(t => t.burnTxHash === burnTxHash);
+        if (!tx) return;
+        
+        try {
+            const url = `${CONFIG.ATTESTATION_API}/${tx.sourceDomain}?transactionHash=${burnTxHash}`;
+            const res = await fetch(url);
+            if (res.ok) {
+                const data = await res.json();
+                if (data?.messages && data.messages.length > 0) {
+                    const message = data.messages[0];
+                    if (message.status === 'complete' && message.attestation) {
+                        // Update to ready
+                        updatePendingTx(burnTxHash, {
+                            status: 'ready_to_mint',
+                            message: message.message,
+                            attestation: message.attestation
+                        });
+                        alert('✅ Attestation ready! You can now complete the mint.');
+                        showPendingModal(); // Refresh modal
+                    } else {
+                        alert(`Status: ${message.status}\nStill waiting for attestation...`);
+                    }
+                } else {
+                    alert('No attestation data found yet. Please wait...');
+                }
+            } else {
+                alert('Error checking attestation. Please try again.');
+            }
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    }
+    
+    // Execute manual mint (called from UI button)
+    async function executeManualMint() {
+        if (!currentPendingTx) {
+            alert('No pending transaction to mint');
+            return;
+        }
+        
+        try {
+            $('mintReadySection').classList.add('hidden');
+            
+            if (currentPendingTx.direction === 'arc-to-sepolia') {
+                await mintOnSepolia(currentPendingTx.message, currentPendingTx.attestation);
+            } else {
+                await mintOnArc(currentPendingTx.message, currentPendingTx.attestation);
+            }
+            
+            // Remove from pending
+            removePendingTx(currentPendingTx.burnTxHash);
+            currentPendingTx = null;
+            
+            setProgress(100, '✅ Bridge completed!');
+            $('successMessage').classList.remove('hidden');
+            setTimeout(resetBridge, 4000);
+        } catch (e) {
+            console.error('Manual mint error:', e);
+            $('errorMessage').classList.remove('hidden');
+            $('errorDetail').textContent = (e?.message || e).slice(0, 2000);
+            $('mintReadySection').classList.remove('hidden');
+        }
+    }
 
     // ======= UI HELPERS =======
     const $ = id => document.getElementById(id);
@@ -412,12 +678,93 @@
             step.classList.add('border-gray-600','bg-slate-800/30'); circle.classList.add('bg-gray-600'); circle.innerHTML = stepId.replace('step',''); text.classList.add('text-gray-400'); statusSpan.textContent='';
         }
     }
+    
+    // ======= SWAP NETWORKS UI =======
+    function swapNetworks() {
+        bridgeDirection = (bridgeDirection === 'arc-to-sepolia') ? 'sepolia-to-arc' : 'arc-to-sepolia';
+        updateNetworkUI();
+        // Update balance if wallet connected
+        if (userAddress) {
+            updateBalanceForDirection();
+        }
+    }
+    
+    function updateNetworkUI() {
+        const sourceIcon = $('sourceIcon');
+        const destIcon = $('destIcon');
+        const sourceName = $('sourceName');
+        const destName = $('destName');
+        const directionText = $('directionText');
+        
+        if (bridgeDirection === 'arc-to-sepolia') {
+            // Arc -> Sepolia
+            sourceIcon.className = 'w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-purple-500/20';
+            sourceIcon.innerHTML = ARC_ICON_IMG;
+            sourceName.textContent = 'Arc Testnet';
+            
+            destIcon.className = 'w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20';
+            destIcon.innerHTML = SEPOLIA_ICON_SVG;
+            destName.textContent = 'Sepolia';
+            
+            directionText.textContent = 'Arc Testnet → Sepolia';
+            
+            // Update step labels
+            $('step1text').textContent = 'Approve USDC';
+            $('step2text').textContent = 'Burn USDC on Arc';
+            $('step4text').textContent = 'Mint USDC on Sepolia';
+        } else {
+            // Sepolia -> Arc
+            sourceIcon.className = 'w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20';
+            sourceIcon.innerHTML = SEPOLIA_ICON_SVG;
+            sourceName.textContent = 'Sepolia';
+            
+            destIcon.className = 'w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-purple-500/20';
+            destIcon.innerHTML = ARC_ICON_IMG;
+            destName.textContent = 'Arc Testnet';
+            
+            directionText.textContent = 'Sepolia → Arc Testnet';
+            
+            // Update step labels
+            $('step1text').textContent = 'Approve USDC';
+            $('step2text').textContent = 'Burn USDC on Sepolia';
+            $('step4text').textContent = 'Mint USDC on Arc';
+        }
+    }
+    
+    async function updateBalanceForDirection() {
+        try {
+            const sourceConfig = (bridgeDirection === 'arc-to-sepolia') ? CONFIG.ARC : CONFIG.SEPOLIA;
+            const targetChainId = sourceConfig.CHAIN_ID_HEX;
+            
+            // Check current chain
+            const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+            
+            if (currentChainId !== targetChainId) {
+                // Need to switch to show correct balance
+                $('availableBalance').textContent = 'Switch network to view';
+                $('walletBalance').textContent = 'Connect to ' + sourceConfig.NAME + ' to view balance';
+                return;
+            }
+            
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            const usdcRead = new ethers.Contract(sourceConfig.USDC, USDC_ABI, provider);
+            const balRaw = await usdcRead.balanceOf(userAddress);
+            const balPretty = ethers.utils.formatUnits(balRaw, 6);
+            $('availableBalance').textContent = parseFloat(balPretty).toFixed(6);
+            $('walletBalance').textContent = 'Balance on ' + sourceConfig.NAME + ': ' + balPretty + ' USDC';
+        } catch (e) {
+            console.warn('Error updating balance:', e);
+        }
+    }
+    
     function resetProgressUI() {
         setProgress(0, 'Preparing...');
         ['step1','step2','step3','step4'].forEach(s => updateStepStatus(s,'idle'));
         $('successMessage').classList.add('hidden');
         $('errorMessage').classList.add('hidden');
         $('errorDetail').textContent = '';
+        $('mintReadySection').classList.add('hidden');
+        $('estimatedTime').classList.add('hidden');
     }
 
     // ======= TRACKER =======
@@ -519,40 +866,179 @@ try {
         if (!rawAmount || Number(rawAmount) <= 0) { alert('Please enter a valid amount!'); return; }
         const recipient = userAddress; // Always send to own wallet
 
-        $('bridgeForm').classList.add('hidden'); $('bridgeProgress').classList.remove('hidden');
+        $('bridgeForm').classList.add('hidden'); 
+        $('bridgeProgress').classList.remove('hidden');
+        $('mintReadySection').classList.add('hidden');
+        $('estimatedTime').classList.add('hidden');
+        
         try {
             setProgress(5, 'Starting bridge...');
-            // APPROVE
-            await approveUSDC(rawAmount);
-            // BURN
-            const burnTxHash = await burnUSDC(rawAmount, recipient);
-            // ATTESTATION
-            const att = await waitForAttestation(burnTxHash);
-            // MINT
-            await mintOnSepolia(att.message, att.attestation);
-            setProgress(100, '✅ Bridge completed!');
-            $('successMessage').classList.remove('hidden');
-            setTimeout(resetBridge, 4000);
+            
+            let burnTxHash;
+            let sourceDomain;
+            
+            if (bridgeDirection === 'arc-to-sepolia') {
+                // ========== ARC -> SEPOLIA ==========
+                await approveUSDC_Arc(rawAmount);
+                burnTxHash = await burnUSDC_Arc(rawAmount, recipient);
+                sourceDomain = CONFIG.ARC.DOMAIN;
+            } else {
+                // ========== SEPOLIA -> ARC ==========
+                await approveUSDC_Sepolia(rawAmount);
+                burnTxHash = await burnUSDC_Sepolia(rawAmount, recipient);
+                sourceDomain = CONFIG.SEPOLIA.DOMAIN;
+            }
+            
+            // Save pending transaction
+            const pendingTx = {
+                burnTxHash,
+                amount: rawAmount,
+                direction: bridgeDirection,
+                sourceDomain,
+                recipient,
+                timestamp: Date.now(),
+                status: 'waiting_attestation'
+            };
+            savePendingTx(pendingTx);
+            currentPendingTx = pendingTx;
+            
+            // Show estimated time
+            $('estimatedTime').classList.remove('hidden');
+            startEstimatedTimer();
+            
+            // Wait for attestation (with new flow that shows mint button)
+            const att = await waitForAttestationWithButton(burnTxHash, sourceDomain);
+            
+            // If we get here directly (auto-mint), proceed
+            if (att) {
+                if (bridgeDirection === 'arc-to-sepolia') {
+                    await mintOnSepolia(att.message, att.attestation);
+                } else {
+                    await mintOnArc(att.message, att.attestation);
+                }
+                
+                removePendingTx(burnTxHash);
+                currentPendingTx = null;
+                setProgress(100, '✅ Bridge completed!');
+                $('successMessage').classList.remove('hidden');
+                setTimeout(resetBridge, 4000);
+            }
         } catch (err) {
             console.error('Bridge error', err);
+            // Don't remove pending tx on error - user can retry
             $('errorMessage').classList.remove('hidden');
             $('errorDetail').textContent = (err?.message || JSON.stringify(err)).slice(0, 2000);
             setProgress(0, 'Error during process');
-            // show detail to debug
-            setTimeout(resetBridge, 8000);
         }
+    }
+    
+    let timerInterval = null;
+    function startEstimatedTimer() {
+        let seconds = 25 * 60; // 25 minutes estimate
+        if (timerInterval) clearInterval(timerInterval);
+        
+        timerInterval = setInterval(() => {
+            seconds--;
+            if (seconds <= 0) {
+                $('timeRemaining').textContent = 'Any moment now...';
+                return;
+            }
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            $('timeRemaining').textContent = `~${mins}:${secs.toString().padStart(2, '0')}`;
+        }, 1000);
+    }
+    
+    function stopEstimatedTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+    }
+    
+    // New attestation function that shows mint button when ready
+    async function waitForAttestationWithButton(txHash, sourceDomain) {
+        setProgress(55, 'Waiting for attestation (Circle Iris API)...');
+        updateStepStatus('step3','pending');
+        const maxAttempts = 180; // 15 minutes (5s intervals)
+        let attempts = 0;
+        
+        console.log('Polling attestation for tx:', txHash);
+        console.log('Source domain:', sourceDomain);
+        
+        while (attempts < maxAttempts) {
+            try {
+                const url = `${CONFIG.ATTESTATION_API}/${sourceDomain}?transactionHash=${txHash}`;
+                const res = await fetch(url);
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    
+                    if (data?.messages && data.messages.length > 0) {
+                        const message = data.messages[0];
+                        console.log('Message status:', message.status);
+                        
+                        if (message.status === 'complete' && message.attestation) {
+                            stopEstimatedTimer();
+                            setProgress(75, 'Attestation received ✓');
+                            updateStepStatus('step3','completed');
+                            $('estimatedTime').classList.add('hidden');
+                            
+                            // Update pending tx with attestation data
+                            updatePendingTx(txHash, {
+                                status: 'ready_to_mint',
+                                message: message.message,
+                                attestation: message.attestation
+                            });
+                            
+                            // Update current pending tx
+                            currentPendingTx = {
+                                ...currentPendingTx,
+                                status: 'ready_to_mint',
+                                message: message.message,
+                                attestation: message.attestation
+                            };
+                            
+                            // Show the mint button instead of auto-minting
+                            $('mintReadySection').classList.remove('hidden');
+                            
+                            // Return null - user will click the mint button
+                            return null;
+                        } else {
+                            setProgress(55 + (attempts / maxAttempts) * 20, `Status: ${message.status}... (${attempts*5}s)`);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log('Attestation fetch error:', e);
+            }
+            
+            await new Promise(r => setTimeout(r, 5000));
+            attempts++;
+            const progress = 55 + (attempts / maxAttempts) * 20;
+            setProgress(progress, `Waiting for attestation... (${Math.floor(attempts * 5 / 60)}m ${(attempts * 5) % 60}s)`);
+        }
+        
+        // Timeout - but transaction is saved, user can check later
+        updateStepStatus('step3','error');
+        $('estimatedTime').classList.add('hidden');
+        throw new Error('Timeout waiting for attestation. Your transaction is saved - click "Action needed" to check later.');
     }
 
     function resetBridge() {
         $('bridgeProgress').classList.add('hidden');
         $('bridgeForm').classList.remove('hidden');
         $('bridgeAmount').value = '';
+        $('mintReadySection').classList.add('hidden');
+        $('estimatedTime').classList.add('hidden');
+        stopEstimatedTimer();
         resetProgressUI();
+        currentPendingTx = null;
     }
 
-    // ======= STEP 1: APPROVE =======
-    async function approveUSDC(amount) {
-        setProgress(10, 'Approving USDC...');
+    // ======= STEP 1: APPROVE (ARC) =======
+    async function approveUSDC_Arc(amount) {
+        setProgress(10, 'Approving USDC on Arc...');
         updateStepStatus('step1', 'pending');
         try {
             const usdc = new ethers.Contract(CONFIG.ARC.USDC, USDC_ABI, signer);
@@ -572,9 +1058,9 @@ try {
         }
     }
 
-    // ======= STEP 2: BURN depositForBurn =======
-    async function burnUSDC(amount, recipient) {
-        setProgress(30, 'Burning USDC (depositForBurn)...');
+    // ======= STEP 2: BURN on ARC =======
+    async function burnUSDC_Arc(amount, recipient) {
+        setProgress(30, 'Burning USDC on Arc (depositForBurn)...');
         updateStepStatus('step2','pending');
         try {
             const messenger = new ethers.Contract(CONFIG.ARC.TOKEN_MESSENGER, TOKEN_MESSENGER_ABI, signer);
@@ -585,12 +1071,10 @@ try {
             const destinationCaller = ethers.constants.HashZero;
             
             // IMPORTANT: For testnet, maxFee should be 0 (no fee)
-            // For mainnet, use actual fee from Circle API
-            // maxFee must be <= amount being transferred
-            const maxFee = 0; // Testnet: no fee required
-            const minFinalityThreshold = 1000; // Fast Transfer (confirmed)
+            const maxFee = 0;
+            const minFinalityThreshold = 1000; // Fast Transfer
             
-            console.log('Burn parameters:');
+            console.log('Burn Arc parameters:');
             console.log('- Amount:', amountUnits.toString());
             console.log('- Destination Domain:', CONFIG.SEPOLIA.DOMAIN);
             console.log('- Mint Recipient:', mintRecipient);
@@ -619,7 +1103,7 @@ try {
                 tx = await messenger.depositForBurn(amountUnits, CONFIG.SEPOLIA.DOMAIN, mintRecipient, CONFIG.ARC.USDC, destinationCaller, maxFee, minFinalityThreshold, { gasLimit: 500000 });
             }
 
-            setProgress(40, 'Transação enviada: ' + tx.hash + ' — aguardando receipt...');
+            setProgress(40, 'Transaction sent: ' + tx.hash + ' — waiting for receipt...');
             const receipt = await tx.wait();
             console.log('Burn receipt', receipt);
             setProgress(50, 'Burn confirmed ✓');
@@ -634,20 +1118,133 @@ try {
         }
     }
 
+    // ======= STEP 1: APPROVE (SEPOLIA) =======
+    async function approveUSDC_Sepolia(amount) {
+        setProgress(10, 'Switching to Sepolia...');
+        updateStepStatus('step1', 'pending');
+        
+        // First ensure we're on Sepolia
+        try {
+            const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+            if (currentChainId !== CONFIG.SEPOLIA.CHAIN_ID_HEX) {
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: CONFIG.SEPOLIA.CHAIN_ID_HEX }]
+                    });
+                } catch (swErr) {
+                    if (swErr.code === 4902 || (swErr.message && swErr.message.includes('Unrecognized chain'))) {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: CONFIG.SEPOLIA.CHAIN_ID_HEX,
+                                chainName: 'Sepolia Testnet',
+                                rpcUrls: ['https://1rpc.io/sepolia', 'https://eth-sepolia.public.blastapi.io', 'https://rpc2.sepolia.org'],
+                                nativeCurrency: { name:'Sepolia ETH', symbol:'ETH', decimals: 18 },
+                                blockExplorerUrls: ['https://sepolia.etherscan.io']
+                            }]
+                        });
+                        await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{ chainId: CONFIG.SEPOLIA.CHAIN_ID_HEX }] });
+                    } else {
+                        throw swErr;
+                    }
+                }
+                await new Promise(r => setTimeout(r, 1000));
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+            }
+        } catch (e) {
+            updateStepStatus('step1','error');
+            throw new Error('Failed to switch to Sepolia: ' + (e?.message || e));
+        }
+        
+        setProgress(15, 'Approving USDC on Sepolia...');
+        try {
+            const usdc = new ethers.Contract(CONFIG.SEPOLIA.USDC, USDC_ABI, signer);
+            const amountUnits = ethers.utils.parseUnits(String(amount), tokenDecimals);
+            const allowance = await usdc.allowance(userAddress, CONFIG.SEPOLIA.TOKEN_MESSENGER);
+            if (allowance.lt(amountUnits)) {
+                const tx = await usdc.approve(CONFIG.SEPOLIA.TOKEN_MESSENGER, ethers.constants.MaxUint256);
+                setProgress(20, 'Waiting for approval confirmation...');
+                await tx.wait();
+            }
+            setProgress(25, 'Approval confirmed ✓');
+            updateStepStatus('step1','completed');
+        } catch (e) {
+            updateStepStatus('step1','error');
+            throw new Error('Approval failed: ' + (e?.message || e));
+        }
+    }
+
+    // ======= STEP 2: BURN on SEPOLIA =======
+    async function burnUSDC_Sepolia(amount, recipient) {
+        setProgress(30, 'Burning USDC on Sepolia (depositForBurn)...');
+        updateStepStatus('step2','pending');
+        try {
+            const messenger = new ethers.Contract(CONFIG.SEPOLIA.TOKEN_MESSENGER, TOKEN_MESSENGER_ABI, signer);
+            const amountUnits = ethers.utils.parseUnits(String(amount), tokenDecimals);
+            const recipientChecksum = ethers.utils.getAddress(recipient);
+            const mintRecipient = ethers.utils.hexZeroPad(recipientChecksum, 32);
+            const destinationCaller = ethers.constants.HashZero;
+            
+            const maxFee = 0; // Testnet: no fee
+            const minFinalityThreshold = 1000; // Fast Transfer
+            
+            console.log('Burn Sepolia parameters:');
+            console.log('- Amount:', amountUnits.toString());
+            console.log('- Destination Domain:', CONFIG.ARC.DOMAIN);
+            console.log('- Mint Recipient:', mintRecipient);
+            console.log('- Burn Token:', CONFIG.SEPOLIA.USDC);
+            console.log('- Max Fee:', maxFee);
+            console.log('- Min Finality Threshold:', minFinalityThreshold);
+
+            let tx;
+            try {
+                const estimated = await messenger.estimateGas.depositForBurn(
+                    amountUnits,
+                    CONFIG.ARC.DOMAIN,
+                    mintRecipient,
+                    CONFIG.SEPOLIA.USDC,
+                    destinationCaller,
+                    maxFee,
+                    minFinalityThreshold
+                );
+                const gasLimit = estimated.mul(150).div(100);
+                console.log('Estimated gas:', estimated.toString());
+                tx = await messenger.depositForBurn(amountUnits, CONFIG.ARC.DOMAIN, mintRecipient, CONFIG.SEPOLIA.USDC, destinationCaller, maxFee, minFinalityThreshold, { gasLimit });
+            } catch (estErr) {
+                console.warn('estimateGas failed, sending with high gasLimit', estErr);
+                tx = await messenger.depositForBurn(amountUnits, CONFIG.ARC.DOMAIN, mintRecipient, CONFIG.SEPOLIA.USDC, destinationCaller, maxFee, minFinalityThreshold, { gasLimit: 500000 });
+            }
+
+            setProgress(40, 'Transaction sent: ' + tx.hash + ' — waiting for receipt...');
+            const receipt = await tx.wait();
+            console.log('Burn receipt', receipt);
+            setProgress(50, 'Burn confirmed ✓');
+            updateStepStatus('step2','completed');
+            return tx.hash;
+        } catch (e) {
+            updateStepStatus('step2','error');
+            console.error('Burn error:', e);
+            const reason = e?.error?.data?.message || e?.reason || e?.message || String(e);
+            throw new Error('Burn failed: ' + reason);
+        }
+    }
+
     // ======= STEP 3: POLL ATTESTATION (Circle Iris API) =======
-    async function waitForAttestation(txHash) {
+    async function waitForAttestation(txHash, sourceDomain) {
         setProgress(55, 'Waiting for attestation (Circle Iris API)...');
         updateStepStatus('step3','pending');
-        const maxAttempts = 120; // Increased timeout - up to 10 minutes
+        const maxAttempts = 120; // Up to 10 minutes
         let attempts = 0;
         
         console.log('Polling attestation for tx:', txHash);
         console.log('Using API endpoint:', CONFIG.ATTESTATION_API);
-        console.log('Source domain (Arc):', CONFIG.ARC.DOMAIN);
+        console.log('Source domain:', sourceDomain);
         
         while (attempts < maxAttempts) {
             try {
-                const url = `${CONFIG.ATTESTATION_API}/${CONFIG.ARC.DOMAIN}?transactionHash=${txHash}`;
+                const url = `${CONFIG.ATTESTATION_API}/${sourceDomain}?transactionHash=${txHash}`;
                 console.log('Fetching:', url);
                 
                 const res = await fetch(url);
@@ -685,7 +1282,7 @@ try {
             setProgress(progress, `Waiting for attestation... (${attempts*5}s)`);
         }
         updateStepStatus('step3','error');
-        throw new Error('Timeout waiting for attestation — check the explorer: ' + CONFIG.ARC.EXPLORER + ' and Iris API');
+        throw new Error('Timeout waiting for attestation — check the explorer and Iris API');
     }
 
     // ======= STEP 4: MINT ON SEPOLIA =======
@@ -802,11 +1399,122 @@ try {
             const receipt = await mintTx.wait();
             console.log('Mint receipt:', receipt);
             
-            setProgress(95, 'Mint confirmed. Switching back to Arc...');
-            // switch back to Arc
-            await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{ chainId: CONFIG.ARC.CHAIN_ID_HEX }] });
+            setProgress(95, 'Mint confirmed on Sepolia! ✓');
+            updateStepStatus('step4','completed');
+        } catch (e) {
+            updateStepStatus('step4','error');
+            console.error('Mint error details:', e);
+            const reason = e?.error?.data?.message || e?.reason || e?.message || String(e);
+            throw new Error('Mint failed: ' + reason);
+        }
+    }
+
+    // ======= STEP 4: MINT ON ARC =======
+    async function mintOnArc(message, attestation) {
+        setProgress(80, 'Switching to Arc Testnet...');
+        updateStepStatus('step4','pending');
+        try {
+            // switch network to Arc
+            try {
+                await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{ chainId: CONFIG.ARC.CHAIN_ID_HEX }] });
+            } catch (swErr) {
+                if (swErr.code === 4902 || swErr.message?.includes('Unrecognized chain') || swErr.message?.includes('wallet_addEthereumChain')) {
+                    setProgress(80, 'Adding Arc Testnet network to wallet...');
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: CONFIG.ARC.CHAIN_ID_HEX,
+                                chainName: CONFIG.ARC.NAME,
+                                rpcUrls: ['https://rpc-testnet.arcscan.net'],
+                                nativeCurrency: { name:'tUSDC', symbol:'USDC', decimals: 18 },
+                                blockExplorerUrls: [CONFIG.ARC.EXPLORER]
+                            }]
+                        });
+                        await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{ chainId: CONFIG.ARC.CHAIN_ID_HEX }] });
+                    } catch (addErr) {
+                        throw new Error('Please add Arc Testnet to your wallet manually:\n\nNetwork: Arc Testnet\nRPC: https://rpc-testnet.arcscan.net\nChain ID: 1660000000026\nSymbol: USDC\nExplorer: https://testnet.arcscan.net');
+                    }
+                } else if (swErr.code === 4001) {
+                    throw new Error('Network switch rejected. Please approve the network switch to continue.');
+                } else {
+                    throw new Error('Failed to switch to Arc: ' + (swErr.message || swErr));
+                }
+            }
+            
+            await new Promise(r => setTimeout(r, 1000));
+            
             provider = new ethers.providers.Web3Provider(window.ethereum);
             signer = provider.getSigner();
+            
+            // Verify we're on Arc network
+            const network = await provider.getNetwork();
+            if (network.chainId !== CONFIG.ARC.CHAIN_ID) {
+                throw new Error('Wallet is not on Arc Testnet. Please switch manually and try again.');
+            }
+            
+            // Check USDC balance for gas (Arc uses USDC as native gas)
+            const gasBalance = await provider.getBalance(userAddress);
+            const gasFormatted = ethers.utils.formatEther(gasBalance);
+            console.log('Arc native USDC balance (for gas):', gasFormatted);
+            
+            if (gasBalance.lt(ethers.utils.parseEther('0.01'))) {
+                throw new Error('Insufficient USDC balance on Arc for gas. You need at least 0.01 USDC.\n\nGet testnet USDC at: https://faucet.circle.com');
+            }
+
+            setProgress(85, 'Calling receiveMessage on Arc...');
+            const transmitter = new ethers.Contract(CONFIG.ARC.MESSAGE_TRANSMITTER, MESSAGE_TRANSMITTER_ABI, signer);
+
+            let msgBytes = message;
+            let attBytes = attestation;
+            
+            console.log('Raw message:', message);
+            console.log('Raw attestation:', attestation);
+            
+            function base64ToHex(base64) {
+                try {
+                    const bin = atob(base64);
+                    let hex = '0x';
+                    for (let i=0;i<bin.length;i++) {
+                        const h = bin.charCodeAt(i).toString(16);
+                        hex += h.length===1 ? '0'+h : h;
+                    }
+                    return hex;
+                } catch (e) { return null; }
+            }
+            
+            if (typeof msgBytes === 'string' && !msgBytes.startsWith('0x')) {
+                const h = base64ToHex(msgBytes);
+                if (h) msgBytes = h;
+                else msgBytes = '0x' + msgBytes;
+            }
+            if (typeof attBytes === 'string' && !attBytes.startsWith('0x')) {
+                const h = base64ToHex(attBytes);
+                if (h) attBytes = h;
+                else attBytes = '0x' + attBytes;
+            }
+
+            console.log('Formatted message:', msgBytes);
+            console.log('Formatted attestation:', attBytes);
+            console.log('MessageTransmitter contract:', CONFIG.ARC.MESSAGE_TRANSMITTER);
+
+            let gasLimit = 500000;
+            try {
+                const estimated = await transmitter.estimateGas.receiveMessage(msgBytes, attBytes);
+                gasLimit = estimated.mul(130).div(100);
+                console.log('Estimated gas:', estimated.toString());
+            } catch (estErr) {
+                console.warn('Gas estimation failed:', estErr);
+            }
+
+            const mintTx = await transmitter.receiveMessage(msgBytes, attBytes, { gasLimit });
+            setProgress(90, 'Mint tx sent on Arc: ' + mintTx.hash);
+            console.log('Mint tx hash:', mintTx.hash);
+            
+            const receipt = await mintTx.wait();
+            console.log('Mint receipt:', receipt);
+            
+            setProgress(95, 'Mint confirmed on Arc! ✓');
             updateStepStatus('step4','completed');
         } catch (e) {
             updateStepStatus('step4','error');
@@ -821,6 +1529,7 @@ try {
     $('addressInput').addEventListener('keypress', (e)=> { if (e.key === 'Enter') fetchAddressData(); });
     $('connectWalletBtn').addEventListener('click', connectWallet);
     $('startBridgeBtn').addEventListener('click', executeBridge);
+    $('swapNetworksBtn').addEventListener('click', swapNetworks);
 
     // tabs
     $('trackerTab').addEventListener('click', ()=> { $('trackerTab').classList.add('tab-active'); $('bridgeTab').classList.remove('tab-active'); $('trackerSection').classList.remove('hidden'); $('bridgeSection').classList.add('hidden'); });
@@ -828,6 +1537,33 @@ try {
 
     // init
     resetProgressUI();
+    updateNetworkUI(); // Initialize network display
+    updatePendingIndicator(); // Check for pending transactions
+    
+    // Auto-check pending transactions for ready status on page load
+    (async function checkPendingOnLoad() {
+        const pending = getPendingTxs();
+        for (const tx of pending) {
+            if (tx.status === 'waiting_attestation') {
+                try {
+                    const url = `${CONFIG.ATTESTATION_API}/${tx.sourceDomain}?transactionHash=${tx.burnTxHash}`;
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data?.messages?.[0]?.status === 'complete' && data.messages[0].attestation) {
+                            updatePendingTx(tx.burnTxHash, {
+                                status: 'ready_to_mint',
+                                message: data.messages[0].message,
+                                attestation: data.messages[0].attestation
+                            });
+                        }
+                    }
+                } catch (e) { /* ignore */ }
+            }
+        }
+        updatePendingIndicator();
+    })();
+    
     console.log('✅ FluxShift - script loaded', CONFIG);
     </script>
 </body>
