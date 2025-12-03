@@ -732,6 +732,8 @@
     }
     
     async function updateBalanceForDirection() {
+        if (!userAddress || !window.ethereum) return;
+        
         try {
             const sourceConfig = (bridgeDirection === 'arc-to-sepolia') ? CONFIG.ARC : CONFIG.SEPOLIA;
             const targetChainId = sourceConfig.CHAIN_ID_HEX;
@@ -740,12 +742,49 @@
             const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
             
             if (currentChainId !== targetChainId) {
-                // Need to switch to show correct balance
-                $('availableBalance').textContent = 'Switch network to view';
-                $('walletBalance').textContent = 'Connect to ' + sourceConfig.NAME + ' to view balance';
-                return;
+                // Try to switch network
+                $('availableBalance').textContent = 'Switching...';
+                $('walletBalance').textContent = 'Switching to ' + sourceConfig.NAME + '...';
+                
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: targetChainId }]
+                    });
+                } catch (swErr) {
+                    if (swErr.code === 4902) {
+                        // Add chain if not exists
+                        const chainParams = bridgeDirection === 'arc-to-sepolia' ? {
+                            chainId: CONFIG.ARC.CHAIN_ID_HEX,
+                            chainName: CONFIG.ARC.NAME,
+                            rpcUrls: [CONFIG.ARC.RPC],
+                            nativeCurrency: { name:'tUSDC', symbol:'USDC', decimals: 18 },
+                            blockExplorerUrls: [CONFIG.ARC.EXPLORER]
+                        } : {
+                            chainId: CONFIG.SEPOLIA.CHAIN_ID_HEX,
+                            chainName: 'Sepolia Testnet',
+                            rpcUrls: ['https://1rpc.io/sepolia'],
+                            nativeCurrency: { name:'Sepolia ETH', symbol:'ETH', decimals: 18 },
+                            blockExplorerUrls: ['https://sepolia.etherscan.io']
+                        };
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [chainParams]
+                        });
+                    } else if (swErr.code === 4001) {
+                        // User rejected
+                        $('availableBalance').textContent = 'Switch network';
+                        $('walletBalance').textContent = 'Please switch to ' + sourceConfig.NAME;
+                        return;
+                    }
+                }
+                
+                // Wait for switch
+                await new Promise(r => setTimeout(r, 500));
+                provider = new ethers.providers.Web3Provider(window.ethereum);
             }
             
+            // Get balance
             provider = new ethers.providers.Web3Provider(window.ethereum);
             const usdcRead = new ethers.Contract(sourceConfig.USDC, USDC_ABI, provider);
             const balRaw = await usdcRead.balanceOf(userAddress);
@@ -754,6 +793,7 @@
             $('walletBalance').textContent = 'Balance on ' + sourceConfig.NAME + ': ' + balPretty + ' USDC';
         } catch (e) {
             console.warn('Error updating balance:', e);
+            $('availableBalance').textContent = '---';
         }
     }
     
@@ -871,6 +911,9 @@ try {
         $('mintReadySection').classList.add('hidden');
         $('estimatedTime').classList.add('hidden');
         
+        // Easter egg for developers 🐰
+        console.log('%c From community to community S2 | Arc | ', 'background: linear-gradient(90deg, #9333ea, #6366f1); color: white; padding: 10px 20px; font-size: 14px; font-weight: bold; border-radius: 5px;');
+        
         try {
             setProgress(5, 'Starting bridge...');
             
@@ -878,54 +921,63 @@ try {
             let sourceDomain;
             
             if (bridgeDirection === 'arc-to-sepolia') {
-                // ========== ARC -> SEPOLIA ==========
+                // ========== ARC -> SEPOLIA (AUTO-MINT) ==========
                 await approveUSDC_Arc(rawAmount);
                 burnTxHash = await burnUSDC_Arc(rawAmount, recipient);
                 sourceDomain = CONFIG.ARC.DOMAIN;
-            } else {
-                // ========== SEPOLIA -> ARC ==========
-                await approveUSDC_Sepolia(rawAmount);
-                burnTxHash = await burnUSDC_Sepolia(rawAmount, recipient);
-                sourceDomain = CONFIG.SEPOLIA.DOMAIN;
-            }
-            
-            // Save pending transaction
-            const pendingTx = {
-                burnTxHash,
-                amount: rawAmount,
-                direction: bridgeDirection,
-                sourceDomain,
-                recipient,
-                timestamp: Date.now(),
-                status: 'waiting_attestation'
-            };
-            savePendingTx(pendingTx);
-            currentPendingTx = pendingTx;
-            
-            // Show estimated time
-            $('estimatedTime').classList.remove('hidden');
-            startEstimatedTimer();
-            
-            // Wait for attestation (with new flow that shows mint button)
-            const att = await waitForAttestationWithButton(burnTxHash, sourceDomain);
-            
-            // If we get here directly (auto-mint), proceed
-            if (att) {
-                if (bridgeDirection === 'arc-to-sepolia') {
-                    await mintOnSepolia(att.message, att.attestation);
-                } else {
-                    await mintOnArc(att.message, att.attestation);
-                }
+                
+                // Save pending transaction (for recovery if needed)
+                const pendingTx = {
+                    burnTxHash,
+                    amount: rawAmount,
+                    direction: bridgeDirection,
+                    sourceDomain,
+                    recipient,
+                    timestamp: Date.now(),
+                    status: 'waiting_attestation'
+                };
+                savePendingTx(pendingTx);
+                
+                // Wait for attestation (original auto-flow)
+                const att = await waitForAttestation(burnTxHash, sourceDomain);
+                
+                // Auto-mint on Sepolia
+                await mintOnSepolia(att.message, att.attestation);
                 
                 removePendingTx(burnTxHash);
-                currentPendingTx = null;
                 setProgress(100, '✅ Bridge completed!');
                 $('successMessage').classList.remove('hidden');
                 setTimeout(resetBridge, 4000);
+                
+            } else {
+                // ========== SEPOLIA -> ARC (MANUAL MINT BUTTON) ==========
+                await approveUSDC_Sepolia(rawAmount);
+                burnTxHash = await burnUSDC_Sepolia(rawAmount, recipient);
+                sourceDomain = CONFIG.SEPOLIA.DOMAIN;
+                
+                // Save pending transaction
+                const pendingTx = {
+                    burnTxHash,
+                    amount: rawAmount,
+                    direction: bridgeDirection,
+                    sourceDomain,
+                    recipient,
+                    timestamp: Date.now(),
+                    status: 'waiting_attestation'
+                };
+                savePendingTx(pendingTx);
+                currentPendingTx = pendingTx;
+                
+                // Show estimated time
+                $('estimatedTime').classList.remove('hidden');
+                startEstimatedTimer();
+                
+                // Wait for attestation with manual mint button
+                await waitForAttestationWithButton(burnTxHash, sourceDomain);
+                // User will click the mint button to complete
             }
         } catch (err) {
             console.error('Bridge error', err);
-            // Don't remove pending tx on error - user can retry
             $('errorMessage').classList.remove('hidden');
             $('errorDetail').textContent = (err?.message || JSON.stringify(err)).slice(0, 2000);
             setProgress(0, 'Error during process');
@@ -956,7 +1008,52 @@ try {
         }
     }
     
-    // New attestation function that shows mint button when ready
+    // Original attestation function (auto-mint for Arc→Sepolia)
+    async function waitForAttestation(txHash, sourceDomain) {
+        setProgress(55, 'Waiting for attestation (Circle Iris API)...');
+        updateStepStatus('step3','pending');
+        const maxAttempts = 180; // 15 minutes
+        let attempts = 0;
+        
+        console.log('Polling attestation for tx:', txHash);
+        console.log('Source domain:', sourceDomain);
+        
+        while (attempts < maxAttempts) {
+            try {
+                const url = `${CONFIG.ATTESTATION_API}/${sourceDomain}?transactionHash=${txHash}`;
+                const res = await fetch(url);
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    
+                    if (data?.messages && data.messages.length > 0) {
+                        const message = data.messages[0];
+                        console.log('Message status:', message.status);
+                        
+                        if (message.status === 'complete' && message.attestation) {
+                            setProgress(75, 'Attestation received ✓');
+                            updateStepStatus('step3','completed');
+                            return { message: message.message, attestation: message.attestation };
+                        } else {
+                            setProgress(55 + (attempts / maxAttempts) * 20, `Status: ${message.status}... (${attempts*5}s)`);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log('Attestation fetch error:', e);
+            }
+            
+            await new Promise(r => setTimeout(r, 5000));
+            attempts++;
+            const progress = 55 + (attempts / maxAttempts) * 20;
+            setProgress(progress, `Waiting for attestation... (${Math.floor(attempts * 5 / 60)}m ${(attempts * 5) % 60}s)`);
+        }
+        
+        updateStepStatus('step3','error');
+        throw new Error('Timeout waiting for attestation.');
+    }
+    
+    // Attestation function with manual mint button (for Sepolia→Arc)
     async function waitForAttestationWithButton(txHash, sourceDomain) {
         setProgress(55, 'Waiting for attestation (Circle Iris API)...');
         updateStepStatus('step3','pending');
