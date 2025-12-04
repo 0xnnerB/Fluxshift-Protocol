@@ -3,78 +3,147 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>FluxShift - CCTP Bridge</title>
+    <title>FluxShift - Cross-Chain USDC Bridge</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fadeIn { animation: fadeIn 0.5s ease-out; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* Institutional gradient background - dark top to purple bottom */
-        .bg-institutional {
-            background: linear-gradient(180deg, 
-                #0a0a0f 0%, 
-                #0d0d1a 15%,
-                #12122a 35%,
-                #1a1a3e 55%,
-                #252552 75%,
-                #2d2d5a 100%
-            );
-            min-height: 100vh;
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            color: white;
+            overflow-x: hidden;
         }
         
-        .tab-active { background: linear-gradient(to right,#9333ea,#6366f1); color: white; }
-        .mono-pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-size: 12px; white-space: pre-wrap; }
         .font-tech { font-family: 'Orbitron', sans-serif; }
-        .font-body { font-family: 'Inter', sans-serif; }
         
-        /* FLUXSHIFT Neon Logo */
+        /* Video Background */
+        .video-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+        
+        /* FLUXSHIFT Neon Logo - Header */
         .flux-cyan {
             color: #00d4ff;
-            text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 30px #00d4ff, 0 0 40px #00d4ff;
+            text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 30px #00d4ff;
         }
         .flux-magenta {
             color: #d946ef;
-            text-shadow: 0 0 10px #d946ef, 0 0 20px #d946ef, 0 0 30px #d946ef, 0 0 40px #d946ef;
-        }
-        .fluxshift-line {
-            background: linear-gradient(90deg, #00d4ff 0%, #d946ef 100%);
-            box-shadow: 0 0 10px #00d4ff, 0 0 20px #d946ef;
-        }
-        @keyframes fluxPulse {
-            0%, 100% { opacity: 0.8; }
-            50% { opacity: 1; }
-        }
-        .fluxshift-logo {
-            animation: fluxPulse 3s ease-in-out infinite;
+            text-shadow: 0 0 10px #d946ef, 0 0 20px #d946ef, 0 0 30px #d946ef;
         }
         
-        @keyframes glow { 
-            0%, 100% { text-shadow: 0 0 20px rgba(147, 51, 234, 0.4), 0 0 40px rgba(99, 102, 241, 0.2); } 
-            50% { text-shadow: 0 0 30px rgba(147, 51, 234, 0.6), 0 0 60px rgba(99, 102, 241, 0.4); } 
-        }
-        .text-glow { animation: glow 4s ease-in-out infinite; }
-        
-        /* Particle animation */
-        @keyframes float-particle {
-            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
-            10% { opacity: 0.6; }
-            90% { opacity: 0.6; }
-            100% { transform: translateY(-100vh) translateX(20px); opacity: 0; }
+        /* Hero Title - White Neon (mais discreto) */
+        .hero-title-white {
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px rgba(255, 255, 255, 0.3);
         }
         
-        .particle {
-            position: fixed;
-            width: 2px;
+        /* Hero Title Glow */
+        .hero-title {
+            text-shadow: 0 0 40px rgba(0, 212, 255, 0.5), 0 0 80px rgba(217, 70, 239, 0.3);
+        }
+        
+        /* Button Styles */
+        .btn-primary {
+            background: linear-gradient(135deg, #9333ea 0%, #6366f1 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(147, 51, 234, 0.4);
+        }
+        
+        .btn-outline {
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        .btn-outline:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.5);
+        }
+        
+        /* Navigation Links */
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
             height: 2px;
-            background: rgba(147, 51, 234, 0.6);
-            border-radius: 50%;
-            pointer-events: none;
-            animation: float-particle linear infinite;
+            background: linear-gradient(90deg, #00d4ff, #d946ef);
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after {
+            width: 100%;
         }
         
-        /* Support card hover effect */
+        /* Tracker Card */
+        .tracker-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        /* Bridge Section (hidden by default) */
+        .bridge-panel {
+            background: rgba(15, 15, 25, 0.95);
+            backdrop-filter: blur(30px);
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.6s ease-out; }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-slideIn { animation: slideIn 0.6s ease-out; }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(147, 51, 234, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(147, 51, 234, 0.6); }
+        }
+        .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+        
+        /* Social Icon */
+        .social-icon {
+            transition: all 0.3s ease;
+        }
+        .social-icon:hover {
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        ::-webkit-scrollbar-thumb { background: #9333ea; border-radius: 3px; }
+        
+        /* Tab Active */
+        .tab-active {
+            background: linear-gradient(135deg, #9333ea 0%, #6366f1 100%);
+            color: white;
+        }
+        
+        /* Support Card */
         .support-card {
             transition: all 0.3s ease;
             border: 1px solid rgba(147, 51, 234, 0.2);
@@ -82,304 +151,455 @@
         .support-card:hover {
             border-color: rgba(147, 51, 234, 0.5);
             transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(147, 51, 234, 0.15);
+            box-shadow: 0 10px 30px rgba(147, 51, 234, 0.2);
+        }
+        
+        .mono-pre { 
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace; 
+            font-size: 12px; 
+            white-space: pre-wrap; 
         }
     </style>
 </head>
-<body class="bg-institutional font-body">
-    <!-- Particles container -->
-    <div id="particles" class="fixed inset-0 overflow-hidden pointer-events-none z-0"></div>
+<body>
+    <!-- Video Background -->
+    <video id="bgVideo" autoplay muted loop playsinline preload="auto" class="video-bg">
+        <source src="FUNDO_DO_SITE_FLUX.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
     
-    <!-- Subtle gradient overlays -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div class="absolute top-0 left-1/4 w-[600px] h-[600px] bg-purple-900/10 rounded-full filter blur-[120px]"></div>
-        <div class="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-indigo-900/15 rounded-full filter blur-[100px]"></div>
-    </div>
-
-    <div class="max-w-7xl mx-auto relative z-10 p-4 md:p-6">
-        
-        <!-- Pending Action Indicator (next to wallet) -->
-        <div id="pendingIndicator" class="hidden fixed top-4 right-44 z-50 cursor-pointer" onclick="showPendingModal()">
-            <div class="flex items-center gap-2 px-3 py-2 bg-orange-500/20 backdrop-blur-sm rounded-full border border-orange-500/50 hover:bg-orange-500/30 transition-all">
-                <div class="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-                <span class="text-orange-300 text-xs font-semibold">Action needed</span>
-            </div>
-        </div>
-        
-        <!-- Wallet indicator (top right) -->
-        <div id="walletIndicator" class="hidden fixed top-4 right-4 z-50">
-            <div class="flex items-center gap-2 px-3 py-2 bg-slate-900/90 backdrop-blur-sm rounded-full border border-purple-500/30">
-                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span id="walletShort" class="text-gray-300 text-xs font-mono"></span>
-            </div>
-        </div>
-
-        <!-- FLUXSHIFT Logo - Top Left -->
-        <div class="fixed top-4 left-4 z-50">
-            <h1 class="text-xl md:text-2xl font-tech font-bold tracking-wider fluxshift-logo">
-                <span class="flux-cyan">FLUX</span><span class="flux-magenta">SHIFT</span>
-            </h1>
-            <div class="h-0.5 w-full mt-1 fluxshift-line"></div>
-        </div>
-
-        <!-- Main content centered vertically -->
-        <div class="min-h-screen flex flex-col justify-center py-20">
-            <div class="mb-8 flex gap-4 justify-center">
-                <button id="trackerTab" class="tab-active px-8 py-4 rounded-xl font-semibold transition-all"> Tracker</button>
-                <button id="bridgeTab" class="px-8 py-4 rounded-xl font-semibold bg-white/5 text-white border border-white/10 hover:bg-white/10 transition-all"> Bridge CCTP</button>
-            </div>
-
-
-            <!-- Tracker section -->
-            <div id="trackerSection">
-                <div class="mb-6 backdrop-blur-xl bg-white/5 rounded-2xl p-6 border border-white/10 shadow-2xl">
-                    <div class="flex gap-3">
-                        <input id="addressInput" type="text" placeholder="Enter address (0x...)" class="flex-1 px-6 py-4 bg-slate-900/50 border border-purple-500/20 rounded-xl text-white placeholder-gray-500 focus:border-purple-500/50 focus:outline-none transition-all"/>
-                        <button id="searchBtn" class="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:opacity-90 transition-all">Search</button>
-                </div>
-                <div id="errorBox" class="mt-4 hidden items-center gap-2 text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/30">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    <span id="errorText"></span>
-                </div>
-            </div>
-
-            <!-- Support Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <a href="https://faucet.circle.com/?utm_source=Blockscout" target="_blank" class="support-card bg-slate-900/40 backdrop-blur-sm rounded-xl p-4 flex items-center gap-4 cursor-pointer">
-                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-600/20 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-white font-medium text-sm">Faucet Tokens</p>
-                        <p class="text-gray-500 text-xs">Get testnet USDC</p>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-600 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                    </svg>
-                </a>
+    <script>
+    // Force video to play on load
+    document.addEventListener('DOMContentLoaded', function() {
+        const video = document.getElementById('bgVideo');
+        if (video) {
+            video.play().catch(function(error) {
+                console.log('Video autoplay failed:', error);
+            });
+        }
+    });
+    </script>
+    
+    <!-- Header Navigation -->
+    <header class="fixed top-0 left-0 right-0 z-50 px-8 md:px-16 lg:px-24 xl:px-32 py-4">
+        <nav class="w-full flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center gap-8">
+                <h1 class="text-2xl md:text-3xl font-tech font-bold tracking-wider cursor-pointer" onclick="showHome()">
+                    <span class="flux-cyan">FLUX</span><span class="flux-magenta">SHIFT</span>
+                </h1>
                 
-                <a href="https://infinityname.com/?utm_source=Blockscout" target="_blank" class="support-card bg-slate-900/40 backdrop-blur-sm rounded-xl p-4 flex items-center gap-4 cursor-pointer">
-                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-600/20 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
-                        </svg>
+                <!-- Nav Links -->
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="https://app.synthra.org/#/swap" target="_blank" class="nav-link text-gray-300 hover:text-white text-sm font-medium">Swap</a>
+                    <a href="https://infinityname.com/" target="_blank" class="nav-link text-gray-300 hover:text-white text-sm font-medium">Domains</a>
+                    <a href="https://faucet.circle.com/" target="_blank" class="nav-link text-gray-300 hover:text-white text-sm font-medium">Faucets</a>
+                </div>
+            </div>
+            
+            <!-- Right Side Buttons -->
+            <div class="flex items-center gap-3">
+                <!-- Pending Indicator -->
+                <div id="pendingIndicator" class="hidden cursor-pointer" onclick="showPendingModal()">
+                    <div class="flex items-center gap-2 px-3 py-2 bg-orange-500/20 rounded-full border border-orange-500/50 hover:bg-orange-500/30 transition-all">
+                        <div class="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                        <span class="text-orange-300 text-xs font-semibold">Action needed</span>
                     </div>
-                    <div>
-                        <p class="text-white font-medium text-sm">Domains</p>
-                        <p class="text-gray-500 text-xs">Register your .arc name</p>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-600 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                    </svg>
-                </a>
+                </div>
                 
-                <a href="https://app.synthra.org/?utm_source=Blockscout#/swap" target="_blank" class="support-card bg-slate-900/40 backdrop-blur-sm rounded-xl p-4 flex items-center gap-4 cursor-pointer">
-                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-600/20 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-white font-medium text-sm">DEX</p>
-                        <p class="text-gray-500 text-xs">Swap tokens on Synthra</p>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-600 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                    </svg>
-                </a>
-            </div>
-
-            <div id="loadingBox" class="hidden text-center py-12">
-                <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
-                <p class="text-white mt-4">Fetching data from Arc Testnet...</p>
-            </div>
-
-            <div id="resultsBox" class="hidden space-y-6 animate-fadeIn">
-                <div class="backdrop-blur-xl bg-white/5 rounded-2xl p-6 border border-white/10 shadow-2xl">
-                    <h3 class="text-white font-semibold mb-3">Analyzed Address</h3>
-                    <p id="addressDisplay" class="text-gray-300 font-mono text-sm break-all bg-slate-900/50 p-3 rounded-lg"></p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="p-6 rounded-2xl bg-slate-900/30 border border-purple-500/20">
-                        <h4 class="text-gray-400 text-sm mb-2 font-medium">USDC Balance</h4>
-                        <p id="balance" class="text-3xl font-bold text-white">0</p>
-                        <span class="text-purple-400 text-xs">USDC (detected decimals)</span>
-                    </div>
-                    <div class="p-6 rounded-2xl bg-slate-900/30 border border-indigo-500/20">
-                        <h4 class="text-gray-400 text-sm mb-2 font-medium">Total Transactions</h4>
-                        <p id="txCount" class="text-3xl font-bold text-white">0</p>
-                    </div>
-                    <div class="p-6 rounded-2xl bg-slate-900/30 border border-green-500/20">
-                        <h4 class="text-gray-400 text-sm mb-2 font-medium">Last Activity</h4>
-                        <p id="lastActivity" class="text-2xl font-bold text-white">-</p>
+                <!-- Wallet Indicator (when connected) -->
+                <div id="walletIndicator" class="hidden">
+                    <div class="flex items-center gap-2 px-3 py-2 bg-green-500/10 rounded-full border border-green-500/30">
+                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <span id="walletShort" class="text-green-300 text-xs font-mono"></span>
                     </div>
                 </div>
+                
+                <!-- Connect Wallet Button (header) -->
+                <button id="headerConnectBtn" onclick="connectWallet()" class="btn-primary px-5 py-2.5 rounded-lg text-white font-semibold text-sm">
+                    Connect Wallet
+                </button>
+                
+                <!-- Launch App Button -->
+                <button id="launchAppBtn" onclick="showBridge()" class="btn-outline px-5 py-2.5 rounded-lg text-white font-semibold text-sm">
+                    Launch App
+                </button>
             </div>
-        </div>
+        </nav>
+    </header>
 
-        <!-- Bridge section -->
-        <div id="bridgeSection" class="hidden">
-            <div class="backdrop-blur-xl bg-white/5 rounded-2xl p-8 border border-white/10 shadow-2xl max-w-2xl mx-auto">
-
-                <div id="walletConnect" class="mb-6">
-                    <button id="connectWalletBtn" class="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:opacity-90 transition-all"> Connect Wallet</button>
-                    <div id="walletInfo" class="hidden mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                        <p class="text-green-300 text-sm font-semibold">✅ Wallet Connected</p>
-                        <p id="walletAddress" class="text-white font-mono text-xs mt-2"></p>
-                        <p id="walletBalance" class="text-gray-300 text-sm mt-1"></p>
+    <!-- Main Content Container -->
+    <main class="relative min-h-screen">
+        
+        <!-- HOME SECTION (Landing Page) -->
+        <section id="homeSection" class="min-h-screen flex items-center px-8 md:px-16 lg:px-24 xl:px-32 pt-20">
+            <div class="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+                
+                <!-- Left Side - Hero Content -->
+                <div class="animate-fadeIn">
+                    <h2 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-tech font-bold mb-6 hero-title-white leading-tight tracking-wider">
+                        FLUXSHIFT
+                    </h2>
+                    <p class="text-xl md:text-2xl lg:text-3xl text-gray-300 mb-4 font-light">
+                        Cross-Chain USDC Bridge
+                    </p>
+                    <p class="text-gray-400 text-base md:text-lg lg:text-xl mb-8 leading-relaxed">
+                        The fastest bridge to transfer native USDC across major blockchain networks. 
+                        Powered by Circle's CCTP protocol, receive your tokens in minutes with institutional-grade security.
+                    </p>
+                    
+                    <div class="flex flex-wrap gap-4">
+                        <button onclick="showBridge()" class="btn-primary px-8 py-4 rounded-xl text-white font-semibold text-lg flex items-center gap-2 pulse-glow">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            Start Bridge
+                        </button>
+                        <a href="https://www.circle.com/pt-br/blog/cctp-version-updates" target="_blank" class="btn-outline px-8 py-4 rounded-xl text-white font-semibold text-lg flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Learn More
+                        </a>
                     </div>
                 </div>
-
-                <div id="bridgeForm" class="hidden space-y-6">
-                    <!-- Network selector - Bidirectional with swap button -->
-                    <div class="bg-slate-900/50 rounded-2xl p-4 border border-slate-700/50">
-                        <div class="flex items-center justify-between">
-                            <!-- Source Network -->
-                            <div id="sourceNetwork" class="flex items-center gap-3">
-                                <div id="sourceIcon" class="w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-purple-500/20">
-                                    <img id="sourceImg" src="data:image/webp;base64,UklGRn4PAABXRUJQVlA4WAoAAAAgAAAAMwEAMwEASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDggkA0AALBMAJ0BKjQBNAE+USiRRiOioaGmllgIcAoJZ27gJ2903AUXzZmTVV2F1eNo2pvJQF87H6df7pvHXD/8hu3P/B+bfW+UJviv3I/Z8K/AC9g/cRwNoAOqg1R+9vLHeDt9o9QP+Vf4z0HtBf1FwEvQzFDKlG42zPhGlY2F1GBtMxc+U1tXHADfIq5U1PoYkLtizPpvlRM0oKi3LAn9FkgBKp/rDDdec00mve5UcZxHnOLTC/COI9bw7Mtk3i2vaN/QPx25OE35/vXuMQRVWT5DdSD4N4jq/EC59pg2nUWRmeUph7WxE6SJIhsCNATrMJgOyp+ugAjXjRkAUt2vXM1EK1/Oz9ZbSAxNTcanf1Jz141ITf58HPpkUoOV7Ryk2AXQ79PIk3rC6/KUXzTizFHg5K3vhAh6doxqVTkLKEqf33kY9Gxydx+y4KFnurrh2AHSbyAf42oWaVn/5XxF2j4nqtHY+CKqzTVWHfhzowdcn4k/e5YCuf+zNW/MiRgftXlyoDtGH7utHAtjhIY1DCwO0ZPRZ9RWaVyC2KIcdiHMf7VkdTxEEJdRoF1YThgd0QJc8LHXcTc+yvjb6cKoKzEXEsIuEMFZYBnK3t2sTb5iiwIHYW20cZVdAMWeji/IHyM5RS2bO4ofoc3vDfNHSdKM6vQcntuPiFazkzmRTO2Xg42zONXCfotF475l2PCAjIUrCg8unLZfylxF9c8Y9tPjnJuoXWV8dyHi1qeRNS39lse2e8FTU4CsBSUfc8I+GhI5pLGYUPTwIssL4mF7/FdDQqXg6TogZi6b5eTV9iDCAG/1SoG4d32275Hd8ju9+AAA/vxFPfI7CG7DloaNPMjPOK3VH7tTgAervUndGW9ztsKzg2kXCiUdSHSqD+ymlIdsAeuagbie/UzXQHE6UGXCXevQ4Zw620MJ4t9iDwS2AvZqA6mxTBjmCsf5UjVzuQAOvbc8v8AonyruqB0jm9HtFZyviY7k/4hZoTgdgH+32Lw9+XDn4Z5QSww6DSWyEDS8wtbvj1fedQYZX9M1/45/OLGM9+8C9dfroaI/aYes5Fm6NKISZ1lgRCkEvuXO7ZWCB/J1kkHJrh5wj+GvtAwEuRnVPO1pVK1Yb5FRmcb//vRew3O5/A8HuJ5tt1W2co3WniFCDS4sC7FTmfYntW+/eeprFA4WBG4ZpT2o/3lcWLxu8PkQ0cNJxvEEvibb3hx40zXweRYVlhmWvDqgZ5NOCk0FBu1Tnuijx2aB7ot5fpKa+wd+//zmOm8nGaQgXrsjZkvZeS2r6WPuyJTfkPw5EUjBWkHiKB8gB3ZFNDuBO4nDNzx6Ec/fDNs3CZ0QMMrcdNK5E0Cn/3ZMgRA655GSH770EYBj0HrLmW5EyYkneCDgLkvymhBk1wRMFoieJF1pB9A8fiJgnBOZ08dpee7vpJg1t7TElcb94mxhYC9ItH5GTFPMgXWKBhLQTOFUCswYsuq9OhwH29/lLyPKLbv1nbNixoJBmtr0EqbqveCQPM6GMgKA2Iz2Dpd2H68oT7+fFbkfkyvCgDSWo+A3+cuACNvm7dH8PyI6uykSx4b1HCOZ5rWEXQX7U78s/EuR+3M5etn5fvm9ncSTS+MpEx8y66P5isJ2fYNEmuCX/dpmxzGL2ZjUidqKNvyTQ2ouvYNjXirvLHzG/8+7aBdyxvg2bRltk1REXFfQCOkhXXZfW8VStg9o+zES40T+F7T3P1Vgm1V6iGr2Q2ig4b4Q9zk8SERakjtWxqR4Q0BY2lM1954TLQodIScEgFdlrYeg3Rschglsl+A/SY1eEDH9u9a2JDVVWwPwKVIUIFFtV8YAUSsZLFTT9rrp3og4uI4AePMgbc1AVYKNDr7WH4tfpE+N6a/9mO+pB4ksIWdmGTgm6PgdYaoF7c/C/mIW4wCQs0u77Bf9xysm9L2kuTkPUNQFEeIH+sKy8I4VvBh9ad4jbYirjH5uylMaU51ARs0JbiFxdfwgedaOmj96pCb/ZMSJW0r2Y2ZkidjYrCymyP/uc3aR5iDk6LSI8tbXQKedq1ZKwmMzhM+HDj1jdH531QoAFEeZDvjwsw7rPdC5Nsf7h59iksCIc0H8GU8f4Fk9zZlqAlh6qWd3TUH3YFQZ9pEVcIA4mS9QLumOCX7oNsRMAgcrLe/ZohNnnMGyJejG+plcYyhWIYAfyGwWxOO0thbVXRAgKlCJ+YO/boAIn6v+nJ1rzrUf0Rtv//yr19yRVnRbfm+RMj9pq0Ga4Oack3hZ+jRLlB9NAeK1yLcwURaj6IMLw8WJuC2PAIa9by3FlGCwRkeVftPXBUwgq4fuUDUUVTWTFQbz8a2ts/+m608pKkckmy+t8+lDWh2pXDETOrNcAZnZ9/370QSM87bCR+kI4PIkoc4ABfhcPvFZmgWnZ9WShvJplMkLDBlrDQ9Ed5vtMRk3PAIKnqrIZrP5fBZ/uF1QXFTSVTOsqSjpMBcJlNNSKPOIbeQqMhPRitdgXwkScm9nELTwLGQjfG5QmuJ1NKHT22LtUjMG7W4j+AjlyDoq6j+tHU25UArzz+o1rPoYOpSNbxjmT3Q4Ig8Vq8ukbKTz5HhEEkvG8sshhoDrV4iEO8sC8oOwHk8ZO/CnOBDuAN/yWZgzlCgyPjfHX/Ro9JdfvBY7djRSNefALXE1UXb6yEIvzDet+we/IaapKu5lrM2vk/4kOE6bXD3s5hknV0oBcLs+cGiITeFM+OjGS6NpxlMs6ond4uaLE9ZqT4+EmqJE9g6thTwxdsEkk3jEmmyYnfC7fLlrFq4ocKgXXj7REXQ90UKC9Dim5edhu1cemwr2DnBSGMpq20f3wTZ8ZN2gnZ6wBh3iJ8Su+Q1lCN0vkefBvCLxARSZxCBwNSXHbhYTVytem8R4bJ/Z9GR0pQf+FlssJc0igsEIIETAl/94jNEPQpT/Rw2/CZnM3PgcBcRp9k7SRFYVu0NuewJkQsFM6hlzMP1XRe2t9odJ62bg6em6kyZQxCctq1pf3sFls2MEH3hfMauFmBx9i1pEmGgOuQPq4jieeFgqjLQupZuxhcm9U1jBJN7+53I3csC+O8s/cdlKM+7dBeY89LYFvaubSN9QTM4P8TlnmWDLt7tJzbwjNdm2L8v4jtZT4JHv5cYplUPMb4IZ+s52ekc+vkqfleUD0kzrtJjkYC72aaHeN/RDUW/IYdB7KNVZt78VmQW7y3sOcdnwza2cJVy102W3MznQwor5Q7aUaGdkS7GnZKi/RaxKfISEDpvxh3Qxh68G09COLvo22PUvs3ToCb0z8/Fb4u6zNIAR8MZDrSeLslrQoMYritNnShDteNymnV9LTs/9Veuk+S5KKuRII5RuoSq2esqOWSK0nVem/u7vf3LWl/bGs18arNvNAqKTuYfV5buSY+n9DMAEDNbrzyCkLWA3cG7QsjZl4wQc+5v5xmjttkFf5xHs37G99q2pkeMPJOIT8mVEOfimMQchfEXtwI2k27TnGagaqmeeCfQzo1PDccFqnRHjhfq5SuQAAizF7LGkM9+qhttZdTnquNtE+3iyIIxEXsWzHmT9m0AZnXvSoulCj5ZRxLucDK8M4I829cDQ5Wz7zEdl/Q/7NmAQkYp9ljOegD8C+SW/CgkcR38QfBN2JPeyEbV7ElXIY4tb0n+vAmUhgSkNmV6plTVoWO/V3hjJPWNTOUbiOFoR4fF1FHXM0AL11B5ZyXvnbBgEew4mEUJ25y/SYd94fo/Cs8x31+xj3FHmi0n8oRINQ7CNkggvED81TfmFoSt2O/ryojEP2LjVtpwrZq+cN/0Q7URkmQVw9lbdHO6rsr4OinmMac7UZC2zq65AcBb4pJRhqA9TM3/uTGIjcTCYMlHglHVhNtpkjfKB05EKcuFcZTQ0wAp5ogAFnIW6a3l9+D+y6cXD7uDSs318nqeC90ThQjCzGwjGlLYAgVYKleUW7S6BS2HkUNKHY0e/4V0SvR+x0bBOZxKFRUTSGd34xNPlp99J1jtpIQAcNBsxGkX5N9vxchMPij5lDC+HQ0h/bgxEWcdsXk6A/kF1W8eWb+LB5x9R0EbeKcHvx1tmVKBfh2l6eZ52nTtg8bQwCm2jwugM7RG9gK6CcovvXz2CqB3CfvpaLOugrO+sSiUAOplEdxECd0vbXlFng599MHu/9ARLauHmzAJ44PFAOqj6rJ7zzLkt65nawl451INGQbX308IWbN7QZWDyDwyDOaVSwFcdGmgPs8uFezfoQEGk7oHMok3qh1mlINtjpNfOzja2pYYDdoruZpmaL2PibEEz/DKuc3Picd1S3kRA/LJ151R0FyNiQ/ZNtpjDJx4sshxiU+RbBgBoqs7NQxho58YYWH3tspFBeu0qkHvw8+LY9UX9xqMFRQiGMABuqF9HMHOtrMHU/4k+IuLwrAvZqC/482JcPV5BxMcwDVHB1n7G6EsfIMHi+Ek73bH59sNX+QjxxNSx5DypAT595ed2BywTAyAKK3tdyVn+sPgRZ6dvwApNuwg8rTbPB0jdxrqlwVXRbDK3PilchJp7E+0Bxu9tmaCqk4QVLSpfY2tMqNSCMCAM6lz5evKLhec/El0FcKN/oJMgmKLhtLDAdhkG87NSznTaqedloXbRI52wvxRoAAA=" class="w-full h-full object-cover" alt="Arc">
-                                </div>
-                                <div>
-                                    <p class="text-gray-400 text-xs">From</p>
-                                    <p id="sourceName" class="text-white font-semibold">Arc Testnet</p>
-                                </div>
+                
+                <!-- Right Side - Tracker Interface -->
+                <div class="animate-slideIn flex justify-center lg:justify-end">
+                    <div class="tracker-card rounded-2xl p-6 w-full max-w-lg">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-white font-semibold text-lg">Transaction Tracker</h3>
+                        </div>
+                        
+                        <!-- Tracker Input -->
+                        <div class="space-y-4">
+                            <div class="flex gap-3">
+                                <input id="addressInput" type="text" placeholder="Enter address (0x...)" 
+                                    class="flex-1 px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-purple-500/50 focus:outline-none transition-all text-sm"/>
+                                <button id="searchBtn" class="px-5 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:opacity-90 transition-all text-sm">
+                                    Search
+                                </button>
                             </div>
                             
-                            <!-- Swap Button -->
-                            <div class="flex items-center px-4">
-                                <button id="swapNetworksBtn" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center border border-purple-500/50 transition-all hover:scale-110 hover:border-purple-400 cursor-pointer" title="Swap networks">
+                            <div id="errorBox" class="hidden items-center gap-2 text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/30 text-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                <span id="errorText"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Loading -->
+                        <div id="loadingBox" class="hidden text-center py-8">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent"></div>
+                            <p class="text-gray-400 mt-3 text-sm">Fetching data...</p>
+                        </div>
+                        
+                        <!-- Results -->
+                        <div id="resultsBox" class="hidden mt-4 space-y-4 animate-fadeIn">
+                            <div class="p-4 bg-black/30 rounded-xl border border-white/5">
+                                <p class="text-gray-500 text-xs mb-1">Address</p>
+                                <p id="addressDisplay" class="text-white font-mono text-xs truncate"></p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="p-4 bg-black/30 rounded-xl border border-white/5">
+                                    <p class="text-gray-500 text-xs mb-1">Balance</p>
+                                    <p class="text-white font-semibold"><span id="balance">0</span> <span class="text-purple-400">USDC</span></p>
+                                </div>
+                                <div class="p-4 bg-black/30 rounded-xl border border-white/5">
+                                    <p class="text-gray-500 text-xs mb-1">Transactions</p>
+                                    <p id="txCount" class="text-white font-semibold">0</p>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-black/30 rounded-xl border border-white/5">
+                                <p class="text-gray-500 text-xs mb-1">Last Activity</p>
+                                <p id="lastActivity" class="text-white text-sm">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BRIDGE SECTION (Full Screen Panel) -->
+        <section id="bridgeSection" class="hidden fixed inset-0 z-40 bridge-panel overflow-y-auto">
+            <div class="min-h-screen px-6 py-20">
+                <div class="max-w-2xl mx-auto">
+                    
+                    <!-- Back Button -->
+                    <button onclick="showHome()" class="mb-6 flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        Back to Home
+                    </button>
+                    
+                    <!-- Bridge Title -->
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-tech font-bold mb-2">
+                            <span class="flux-cyan">CCTP</span> <span class="text-white">Bridge</span>
+                        </h2>
+                        <p class="text-gray-400">Transfer native USDC between networks</p>
+                    </div>
+                    
+                    <!-- History Button (discreto, acima do card à esquerda) -->
+                    <div class="flex justify-start mb-2">
+                        <button onclick="showHistoryModal()" class="flex items-center gap-1 text-gray-500 hover:text-purple-400 text-xs transition-all">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            History
+                        </button>
+                    </div>
+                    
+                    <!-- Bridge Card -->
+                    <div class="bg-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-white/10 shadow-2xl">
+                        
+                        <!-- Connect Wallet Section -->
+                        <div id="connectWalletBtn" class="text-center py-8">
+                            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500/20 to-indigo-500/20 flex items-center justify-center">
+                                <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-white font-semibold text-lg mb-2">Connect Your Wallet</h3>
+                            <p class="text-gray-500 text-sm mb-4">Connect your wallet to start bridging</p>
+                            <button onclick="connectWallet()" class="btn-primary px-8 py-3 rounded-xl text-white font-semibold">
+                                Connect Wallet
+                            </button>
+                        </div>
+                        
+                        <!-- Wallet Info (hidden until connected) -->
+                        <div id="walletInfo" class="hidden mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                                <div>
+                                    <p class="text-green-300 font-semibold text-sm">Wallet Connected</p>
+                                    <p id="walletAddress" class="text-gray-400 text-xs font-mono"></p>
+                                </div>
+                            </div>
+                            <p id="walletBalance" class="text-gray-300 text-sm mt-2"></p>
+                        </div>
+                        
+                        <!-- Bridge Form (hidden until connected) -->
+                        <div id="bridgeForm" class="hidden space-y-6">
+                            
+                            <!-- Network Selection -->
+                            <div class="flex items-center justify-between gap-4">
+                                <div id="sourceNetwork" class="flex-1 p-4 bg-slate-800/50 rounded-xl border border-white/5">
+                                    <p class="text-gray-500 text-xs mb-2">From</p>
+                                    <div class="flex items-center gap-3">
+                                        <div id="sourceIcon" class="w-10 h-10 rounded-lg overflow-hidden"></div>
+                                        <p id="sourceName" class="text-white font-semibold">Arc Testnet</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Swap Button -->
+                                <button id="swapNetworksBtn" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center border border-purple-500/50 transition-all hover:scale-110">
                                     <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
                                     </svg>
                                 </button>
+                                
+                                <div id="destNetwork" class="flex-1 p-4 bg-slate-800/50 rounded-xl border border-white/5">
+                                    <p class="text-gray-500 text-xs mb-2">To</p>
+                                    <div class="flex items-center gap-3">
+                                        <div id="destIcon" class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center"></div>
+                                        <p id="destName" class="text-white font-semibold">Sepolia</p>
+                                    </div>
+                                </div>
                             </div>
                             
-                            <!-- Destination Network -->
-                            <div id="destNetwork" class="flex items-center gap-3">
-                                <div>
-                                    <p class="text-gray-400 text-xs text-right">To</p>
-                                    <p id="destName" class="text-white font-semibold">Sepolia</p>
+                            <!-- Amount Input -->
+                            <div class="p-4 bg-slate-800/50 rounded-xl border border-white/5">
+                                <div class="flex items-center justify-between mb-2">
+                                    <p class="text-gray-500 text-xs">Amount</p>
+                                    <p class="text-gray-500 text-xs">Available: <span id="availableBalance" class="text-purple-400">0</span> USDC</p>
                                 </div>
-                                <div id="destIcon" class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                                    <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M11.944 17.97L4.58 13.62 11.943 24l7.37-10.38-7.372 4.35h.003zM12.056 0L4.69 12.223l7.365 4.354 7.365-4.35L12.056 0z"/>
-                                    </svg>
+                                <div class="flex items-center gap-3">
+                                    <input id="bridgeAmount" type="number" placeholder="0.00" step="0.01" min="0.01"
+                                        class="flex-1 bg-transparent text-white text-2xl font-semibold placeholder-gray-600 focus:outline-none"/>
+                                    <div class="flex items-center gap-2 px-3 py-2 bg-slate-700/50 rounded-lg">
+                                        <div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+                                            <span class="text-white text-xs font-bold">$</span>
+                                        </div>
+                                        <span class="text-white font-semibold">USDC</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <!-- Direction indicator -->
-                        <div class="mt-3 text-center">
-                            <span id="directionText" class="text-xs text-gray-500">Arc Testnet → Sepolia</span>
-                        </div>
-                    </div>
-
-                    <!-- Amount input with USDC badge -->
-                    <div class="bg-slate-900/50 rounded-2xl p-4 border border-slate-700/50">
-                        <div class="flex items-center justify-between">
-                            <input type="number" id="bridgeAmount" placeholder="0" step="0.01" min="0.01" class="flex-1 bg-transparent text-3xl text-white font-semibold outline-none placeholder-gray-600" style="max-width: 70%;"/>
-                            <div class="flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-xl">
-                                <div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
-                                    <span class="text-white text-xs font-bold">$</span>
-                                </div>
-                                <span class="text-white font-semibold">USDC</span>
+                            
+                            <!-- Direction Indicator -->
+                            <div class="text-center">
+                                <span id="directionText" class="text-gray-400 text-sm">Arc Testnet → Sepolia</span>
                             </div>
-                        </div>
-                        <p class="text-gray-500 text-xs mt-3">Available balance: <span id="availableBalance" class="text-gray-400">0</span> USDC</p>
-                    </div>
-
-                    <button id="startBridgeBtn" class="w-full px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:opacity-90 transition-all">🚀 Start Bridge</button>
-                </div>
-
-                <div id="bridgeProgress" class="hidden space-y-4 mt-6">
-                    <div class="p-4 rounded-xl border border-purple-500/30 bg-slate-900/30">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-white font-semibold">Progress</span>
-                            <span id="progressPercent" class="text-purple-400 font-bold">0%</span>
-                        </div>
-                        <div class="w-full bg-gray-700 rounded-full h-2"><div id="progressBar" class="h-2 rounded-full transition-all duration-500" style="width:0%; background:linear-gradient(90deg,#9333ea,#6366f1)"></div></div>
-                        <p id="progressMessage" class="text-gray-300 text-sm mt-2">Preparing...</p>
-                    </div>
-
-                    <div class="space-y-3">
-                        <div id="step1" class="p-3 rounded-lg border border-gray-700 bg-slate-900/20 flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">1</div><span id="step1text" class="text-gray-400 flex-1">Approve USDC</span><span id="step1status" class="text-xs"></span></div>
-                        <div id="step2" class="p-3 rounded-lg border border-gray-700 bg-slate-900/20 flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">2</div><span id="step2text" class="text-gray-400 flex-1">Burn USDC on Arc</span><span id="step2status" class="text-xs"></span></div>
-                        <div id="step3" class="p-3 rounded-lg border border-gray-700 bg-slate-900/20 flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">3</div><span id="step3text" class="text-gray-400 flex-1">Waiting for Attestation</span><span id="step3status" class="text-xs"></span></div>
-                        <div id="step4" class="p-3 rounded-lg border border-gray-700 bg-slate-900/20 flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">4</div><span id="step4text" class="text-gray-400 flex-1">Mint USDC on Sepolia</span><span id="step4status" class="text-xs"></span></div>
-                    </div>
-                    
-                    <!-- Estimated time display -->
-                    <div id="estimatedTime" class="hidden text-center p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                        <p class="text-blue-300 text-sm">⏱️ Estimated wait: <span id="timeRemaining" class="font-bold">~25 min</span></p>
-                        <p class="text-gray-500 text-xs mt-1">You can leave this page - your transaction will be saved</p>
-                    </div>
-                    
-                    <!-- Manual Mint Button (appears when attestation is ready) -->
-                    <div id="mintReadySection" class="hidden">
-                        <div class="p-4 bg-green-500/10 border border-green-500/30 rounded-lg text-center">
-                            <p class="text-green-300 font-semibold mb-3">✅ Attestation Ready!</p>
-                            <p class="text-gray-400 text-sm mb-4">Click below to complete the mint on the destination chain</p>
-                            <button id="manualMintBtn" onclick="executeManualMint()" class="w-full px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:opacity-90 transition-all text-lg">
-                                🪙 Complete Mint
+                            
+                            <!-- Bridge Button -->
+                            <button id="startBridgeBtn" class="w-full btn-primary py-4 rounded-xl text-white font-semibold text-lg flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                                Start Bridge
                             </button>
                         </div>
+                        
+                        <!-- Bridge Progress (hidden until started) -->
+                        <div id="bridgeProgress" class="hidden space-y-6">
+                            <div class="p-4 bg-slate-800/50 rounded-xl">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-white font-semibold">Progress</span>
+                                    <span id="progressPercent" class="text-purple-400 font-bold">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div id="progressBar" class="h-2 rounded-full transition-all duration-500" style="width:0%; background:linear-gradient(90deg,#9333ea,#6366f1)"></div>
+                                </div>
+                                <p id="progressMessage" class="text-gray-400 text-sm mt-2">Preparing...</p>
+                            </div>
+                            
+                            <!-- Steps -->
+                            <div class="space-y-3">
+                                <div id="step1" class="p-3 rounded-lg border border-gray-700 bg-slate-800/30 flex items-center gap-3">
+                                    <div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">1</div>
+                                    <span id="step1text" class="text-gray-400 flex-1">Approve USDC</span>
+                                    <span id="step1status" class="text-xs"></span>
+                                </div>
+                                <div id="step2" class="p-3 rounded-lg border border-gray-700 bg-slate-800/30 flex items-center gap-3">
+                                    <div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">2</div>
+                                    <span id="step2text" class="text-gray-400 flex-1">Burn USDC on Arc</span>
+                                    <span id="step2status" class="text-xs"></span>
+                                </div>
+                                <div id="step3" class="p-3 rounded-lg border border-gray-700 bg-slate-800/30 flex items-center gap-3">
+                                    <div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">3</div>
+                                    <span id="step3text" class="text-gray-400 flex-1">Waiting for Attestation</span>
+                                    <span id="step3status" class="text-xs"></span>
+                                </div>
+                                <div id="step4" class="p-3 rounded-lg border border-gray-700 bg-slate-800/30 flex items-center gap-3">
+                                    <div class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white">4</div>
+                                    <span id="step4text" class="text-gray-400 flex-1">Mint USDC on Sepolia</span>
+                                    <span id="step4status" class="text-xs"></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Estimated Time -->
+                            <div id="estimatedTime" class="hidden text-center p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                                <p class="text-blue-300 text-sm">⏱️ Estimated wait: <span id="timeRemaining" class="font-bold">~25 min</span></p>
+                                <p class="text-gray-500 text-xs mt-1">You can leave this page - your transaction will be saved</p>
+                            </div>
+                            
+                            <!-- Manual Mint Button -->
+                            <div id="mintReadySection" class="hidden">
+                                <div class="p-4 bg-green-500/10 border border-green-500/30 rounded-lg text-center">
+                                    <p class="text-green-300 font-semibold mb-3">✅ Attestation Ready!</p>
+                                    <p class="text-gray-400 text-sm mb-4">Click below to complete the mint</p>
+                                    <button id="manualMintBtn" onclick="executeManualMint()" class="w-full px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:opacity-90 transition-all text-lg">
+                                        🪙 Complete Mint
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Success/Error Messages -->
+                            <div id="successMessage" class="hidden p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                                <p class="text-green-300 font-semibold text-center">✅ Bridge completed successfully!</p>
+                            </div>
+                            <div id="errorMessage" class="hidden p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                                <p class="text-red-300 font-semibold">❌ Bridge Error</p>
+                                <p id="errorDetail" class="text-gray-300 text-sm mt-2 mono-pre"></p>
+                            </div>
+                        </div>
                     </div>
-
-                    <div id="successMessage" class="hidden p-4 bg-green-500/10 border border-green-500/30 rounded-lg"><p class="text-green-300 font-semibold text-center">✅ Bridge completed successfully!</p></div>
-                    <div id="errorMessage" class="hidden p-4 bg-red-500/10 border border-red-500/30 rounded-lg"><p class="text-red-300 font-semibold">❌ Bridge Error</p><p id="errorDetail" class="text-gray-300 text-sm mt-2 mono-pre"></p></div>
-                </div>
-
-            </div>
-        </div>
-        </div> <!-- End of centered content -->
-        
-        <!-- Pending Transactions Modal -->
-        <div id="pendingModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-            <div class="bg-slate-900 rounded-2xl p-6 border border-purple-500/30 max-w-md w-full mx-4 shadow-2xl">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-white font-bold text-lg">Pending Transactions</h3>
-                    <button onclick="hidePendingModal()" class="text-gray-400 hover:text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-                <div id="pendingList" class="space-y-3 max-h-80 overflow-y-auto">
-                    <!-- Pending transactions will be listed here -->
-                </div>
-                <div id="noPendingMsg" class="hidden text-center py-8">
-                    <p class="text-gray-500">No pending transactions</p>
                 </div>
             </div>
-        </div>
-
-        <div class="fixed bottom-4 left-4">
-            <p class="text-gray-600 text-xs font-light">From community to community S2</p>
+        </section>
+    </main>
+    
+    <!-- Pending Transactions Modal (Action Needed) -->
+    <div id="pendingModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div class="bg-slate-900 rounded-2xl p-6 border border-purple-500/30 max-w-md w-full mx-4 shadow-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-white font-bold text-lg">⚡ Action Needed</h3>
+                <button onclick="hidePendingModal()" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <p class="text-gray-400 text-xs mb-3">These transactions need your action to complete.</p>
+            <div id="pendingList" class="space-y-3 max-h-80 overflow-y-auto"></div>
+            <div id="noPendingMsg" class="hidden text-center py-8">
+                <p class="text-gray-500">No pending transactions</p>
+            </div>
         </div>
     </div>
     
-    <!-- Particle System Script -->
+    <!-- History Modal (All Transactions) -->
+    <div id="historyModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div class="bg-slate-900 rounded-2xl p-6 border border-purple-500/30 max-w-lg w-full mx-4 shadow-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-white font-bold text-lg">📜 Transaction History</h3>
+                <button onclick="hideHistoryModal()" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="flex gap-2 mb-4">
+                <button id="historyTabPending" onclick="showHistoryTab('pending')" class="flex-1 px-3 py-2 rounded-lg text-sm font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                    ⏳ Pending
+                </button>
+                <button id="historyTabCompleted" onclick="showHistoryTab('completed')" class="flex-1 px-3 py-2 rounded-lg text-sm font-medium bg-slate-800 text-gray-400 border border-gray-700">
+                    ✅ Completed
+                </button>
+            </div>
+            
+            <!-- Pending List -->
+            <div id="historyPendingList" class="space-y-3 max-h-60 overflow-y-auto"></div>
+            
+            <!-- Completed List -->
+            <div id="historyCompletedList" class="hidden space-y-3 max-h-60 overflow-y-auto"></div>
+            
+            <!-- Empty States -->
+            <div id="historyNoPending" class="hidden text-center py-6">
+                <p class="text-gray-500 text-sm">No pending transactions</p>
+            </div>
+            <div id="historyNoCompleted" class="hidden text-center py-6">
+                <p class="text-gray-500 text-sm">No completed transactions yet</p>
+            </div>
+            
+            <!-- Clear Completed Button -->
+            <div id="clearCompletedBtn" class="hidden mt-4 pt-4 border-t border-gray-700">
+                <button onclick="clearCompletedTxs()" class="w-full px-4 py-2 bg-slate-800 hover:bg-slate-700 text-gray-400 rounded-lg text-xs font-medium transition-all">
+                    Clear completed history
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Twitter/X Icon - Bottom Right -->
+    <a href="https://x.com/FluxShift_" target="_blank" class="fixed bottom-6 right-6 z-50 social-icon">
+        <div class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all">
+            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+        </div>
+    </a>
+    
+    <!-- Footer Text -->
+    <div class="fixed bottom-6 left-6 z-50">
+        <p class="text-gray-600 text-xs">From community to community S2</p>
+    </div>
+
+    <!-- Navigation Functions -->
     <script>
-    function createParticles() {
-        const container = document.getElementById('particles');
-        const particleCount = 30;
-        
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.bottom = '-10px';
-            particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
-            particle.style.animationDelay = (Math.random() * 10) + 's';
-            particle.style.width = (Math.random() * 2 + 1) + 'px';
-            particle.style.height = particle.style.width;
-            particle.style.opacity = Math.random() * 0.5 + 0.1;
-            container.appendChild(particle);
-        }
+    function showHome() {
+        document.getElementById('homeSection').classList.remove('hidden');
+        document.getElementById('bridgeSection').classList.add('hidden');
+        document.getElementById('launchAppBtn').classList.remove('hidden');
     }
-    createParticles();
+    
+    function showBridge() {
+        document.getElementById('homeSection').classList.add('hidden');
+        document.getElementById('bridgeSection').classList.remove('hidden');
+        document.getElementById('launchAppBtn').classList.add('hidden');
+    }
     </script>
 
     <script>
@@ -441,29 +661,39 @@
     const ARC_ICON_IMG = `<img src="data:image/webp;base64,UklGRn4PAABXRUJQVlA4WAoAAAAgAAAAMwEAMwEASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDggkA0AALBMAJ0BKjQBNAE+USiRRiOioaGmllgIcAoJZ27gJ2903AUXzZmTVV2F1eNo2pvJQF87H6df7pvHXD/8hu3P/B+bfW+UJviv3I/Z8K/AC9g/cRwNoAOqg1R+9vLHeDt9o9QP+Vf4z0HtBf1FwEvQzFDKlG42zPhGlY2F1GBtMxc+U1tXHADfIq5U1PoYkLtizPpvlRM0oKi3LAn9FkgBKp/rDDdec00mve5UcZxHnOLTC/COI9bw7Mtk3i2vaN/QPx25OE35/vXuMQRVWT5DdSD4N4jq/EC59pg2nUWRmeUph7WxE6SJIhsCNATrMJgOyp+ugAjXjRkAUt2vXM1EK1/Oz9ZbSAxNTcanf1Jz141ITf58HPpkUoOV7Ryk2AXQ79PIk3rC6/KUXzTizFHg5K3vhAh6doxqVTkLKEqf33kY9Gxydx+y4KFnurrh2AHSbyAf42oWaVn/5XxF2j4nqtHY+CKqzTVWHfhzowdcn4k/e5YCuf+zNW/MiRgftXlyoDtGH7utHAtjhIY1DCwO0ZPRZ9RWaVyC2KIcdiHMf7VkdTxEEJdRoF1YThgd0QJc8LHXcTc+yvjb6cKoKzEXEsIuEMFZYBnK3t2sTb5iiwIHYW20cZVdAMWeji/IHyM5RS2bO4ofoc3vDfNHSdKM6vQcntuPiFazkzmRTO2Xg42zONXCfotF475l2PCAjIUrCg8unLZfylxF9c8Y9tPjnJuoXWV8dyHi1qeRNS39lse2e8FTU4CsBSUfc8I+GhI5pLGYUPTwIssL4mF7/FdDQqXg6TogZi6b5eTV9iDCAG/1SoG4d32275Hd8ju9+AAA/vxFPfI7CG7DloaNPMjPOK3VH7tTgAervUndGW9ztsKzg2kXCiUdSHSqD+ymlIdsAeuagbie/UzXQHE6UGXCXevQ4Zw620MJ4t9iDwS2AvZqA6mxTBjmCsf5UjVzuQAOvbc8v8AonyruqB0jm9HtFZyviY7k/4hZoTgdgH+32Lw9+XDn4Z5QSww6DSWyEDS8wtbvj1fedQYZX9M1/45/OLGM9+8C9dfroaI/aYes5Fm6NKISZ1lgRCkEvuXO7ZWCB/J1kkHJrh5wj+GvtAwEuRnVPO1pVK1Yb5FRmcb//vRew3O5/A8HuJ5tt1W2co3WniFCDS4sC7FTmfYntW+/eeprFA4WBG4ZpT2o/3lcWLxu8PkQ0cNJxvEEvibb3hx40zXweRYVlhmWvDqgZ5NOCk0FBu1Tnuijx2aB7ot5fpKa+wd+//zmOm8nGaQgXrsjZkvZeS2r6WPuyJTfkPw5EUjBWkHiKB8gB3ZFNDuBO4nDNzx6Ec/fDNs3CZ0QMMrcdNK5E0Cn/3ZMgRA655GSH770EYBj0HrLmW5EyYkneCDgLkvymhBk1wRMFoieJF1pB9A8fiJgnBOZ08dpee7vpJg1t7TElcb94mxhYC9ItH5GTFPMgXWKBhLQTOFUCswYsuq9OhwH29/lLyPKLbv1nbNixoJBmtr0EqbqveCQPM6GMgKA2Iz2Dpd2H68oT7+fFbkfkyvCgDSWo+A3+cuACNvm7dH8PyI6uykSx4b1HCOZ5rWEXQX7U78s/EuR+3M5etn5fvm9ncSTS+MpEx8y66P5isJ2fYNEmuCX/dpmxzGL2ZjUidqKNvyTQ2ouvYNjXirvLHzG/8+7aBdyxvg2bRltk1REXFfQCOkhXXZfW8VStg9o+zES40T+F7T3P1Vgm1V6iGr2Q2ig4b4Q9zk8SERakjtWxqR4Q0BY2lM1954TLQodIScEgFdlrYeg3Rschglsl+A/SY1eEDH9u9a2JDVVWwPwKVIUIFFtV8YAUSsZLFTT9rrp3og4uI4AePMgbc1AVYKNDr7WH4tfpE+N6a/9mO+pB4ksIWdmGTgm6PgdYaoF7c/C/mIW4wCQs0u77Bf9xysm9L2kuTkPUNQFEeIH+sKy8I4VvBh9ad4jbYirjH5uylMaU51ARs0JbiFxdfwgedaOmj96pCb/ZMSJW0r2Y2ZkidjYrCymyP/uc3aR5iDk6LSI8tbXQKedq1ZKwmMzhM+HDj1jdH531QoAFEeZDvjwsw7rPdC5Nsf7h59iksCIc0H8GU8f4Fk9zZlqAlh6qWd3TUH3YFQZ9pEVcIA4mS9QLumOCX7oNsRMAgcrLe/ZohNnnMGyJejG+plcYyhWIYAfyGwWxOO0thbVXRAgKlCJ+YO/boAIn6v+nJ1rzrUf0Rtv//yr19yRVnRbfm+RMj9pq0Ga4Oack3hZ+jRLlB9NAeK1yLcwURaj6IMLw8WJuC2PAIa9by3FlGCwRkeVftPXBUwgq4fuUDUUVTWTFQbz8a2ts/+m608pKkckmy+t8+lDWh2pXDETOrNcAZnZ9/370QSM87bCR+kI4PIkoc4ABfhcPvFZmgWnZ9WShvJplMkLDBlrDQ9Ed5vtMRk3PAIKnqrIZrP5fBZ/uF1QXFTSVTOsqSjpMBcJlNNSKPOIbeQqMhPRitdgXwkScm9nELTwLGQjfG5QmuJ1NKHT22LtUjMG7W4j+AjlyDoq6j+tHU25UArzz+o1rPoYOpSNbxjmT3Q4Ig8Vq8ukbKTz5HhEEkvG8sshhoDrV4iEO8sC8oOwHk8ZO/CnOBDuAN/yWZgzlCgyPjfHX/Ro9JdfvBY7djRSNefALXE1UXb6yEIvzDet+we/IaapKu5lrM2vk/4kOE6bXD3s5hknV0oBcLs+cGiITeFM+OjGS6NpxlMs6ond4uaLE9ZqT4+EmqJE9g6thTwxdsEkk3jEmmyYnfC7fLlrFq4ocKgXXj7REXQ90UKC9Dim5edhu1cemwr2DnBSGMpq20f3wTZ8ZN2gnZ6wBh3iJ8Su+Q1lCN0vkefBvCLxARSZxCBwNSXHbhYTVytem8R4bJ/Z9GR0pQf+FlssJc0igsEIIETAl/94jNEPQpT/Rw2/CZnM3PgcBcRp9k7SRFYVu0NuewJkQsFM6hlzMP1XRe2t9odJ62bg6em6kyZQxCctq1pf3sFls2MEH3hfMauFmBx9i1pEmGgOuQPq4jieeFgqjLQupZuxhcm9U1jBJN7+53I3csC+O8s/cdlKM+7dBeY89LYFvaubSN9QTM4P8TlnmWDLt7tJzbwjNdm2L8v4jtZT4JHv5cYplUPMb4IZ+s52ekc+vkqfleUD0kzrtJjkYC72aaHeN/RDUW/IYdB7KNVZt78VmQW7y3sOcdnwza2cJVy102W3MznQwor5Q7aUaGdkS7GnZKi/RaxKfISEDpvxh3Qxh68G09COLvo22PUvs3ToCb0z8/Fb4u6zNIAR8MZDrSeLslrQoMYritNnShDteNymnV9LTs/9Veuk+S5KKuRII5RuoSq2esqOWSK0nVem/u7vf3LWl/bGs18arNvNAqKTuYfV5buSY+n9DMAEDNbrzyCkLWA3cG7QsjZl4wQc+5v5xmjttkFf5xHs37G99q2pkeMPJOIT8mVEOfimMQchfEXtwI2k27TnGagaqmeeCfQzo1PDccFqnRHjhfq5SuQAAizF7LGkM9+qhttZdTnquNtE+3iyIIxEXsWzHmT9m0AZnXvSoulCj5ZRxLucDK8M4I829cDQ5Wz7zEdl/Q/7NmAQkYp9ljOegD8C+SW/CgkcR38QfBN2JPeyEbV7ElXIY4tb0n+vAmUhgSkNmV6plTVoWO/V3hjJPWNTOUbiOFoR4fF1FHXM0AL11B5ZyXvnbBgEew4mEUJ25y/SYd94fo/Cs8x31+xj3FHmi0n8oRINQ7CNkggvED81TfmFoSt2O/ryojEP2LjVtpwrZq+cN/0Q7URkmQVw9lbdHO6rsr4OinmMac7UZC2zq65AcBb4pJRhqA9TM3/uTGIjcTCYMlHglHVhNtpkjfKB05EKcuFcZTQ0wAp5ogAFnIW6a3l9+D+y6cXD7uDSs318nqeC90ThQjCzGwjGlLYAgVYKleUW7S6BS2HkUNKHY0e/4V0SvR+x0bBOZxKFRUTSGd34xNPlp99J1jtpIQAcNBsxGkX5N9vxchMPij5lDC+HQ0h/bgxEWcdsXk6A/kF1W8eWb+LB5x9R0EbeKcHvx1tmVKBfh2l6eZ52nTtg8bQwCm2jwugM7RG9gK6CcovvXz2CqB3CfvpaLOugrO+sSiUAOplEdxECd0vbXlFng599MHu/9ARLauHmzAJ44PFAOqj6rJ7zzLkt65nawl451INGQbX308IWbN7QZWDyDwyDOaVSwFcdGmgPs8uFezfoQEGk7oHMok3qh1mlINtjpNfOzja2pYYDdoruZpmaL2PibEEz/DKuc3Picd1S3kRA/LJ151R0FyNiQ/ZNtpjDJx4sshxiU+RbBgBoqs7NQxho58YYWH3tspFBeu0qkHvw8+LY9UX9xqMFRQiGMABuqF9HMHOtrMHU/4k+IuLwrAvZqC/482JcPV5BxMcwDVHB1n7G6EsfIMHi+Ek73bH59sNX+QjxxNSx5DypAT595ed2BywTAyAKK3tdyVn+sPgRZ6dvwApNuwg8rTbPB0jdxrqlwVXRbDK3PilchJp7E+0Bxu9tmaCqk4QVLSpfY2tMqNSCMCAM6lz5evKLhec/El0FcKN/oJMgmKLhtLDAdhkG87NSznTaqedloXbRI52wvxRoAAA=" class="w-full h-full object-cover" alt="Arc">`;
     const SEPOLIA_ICON_SVG = `<svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 17.97L4.58 13.62 11.943 24l7.37-10.38-7.372 4.35h.003zM12.056 0L4.69 12.223l7.365 4.354 7.365-4.35L12.056 0z"/></svg>`;
 
-    // ======= PENDING TRANSACTIONS STORAGE =======
-    const STORAGE_KEY = 'fluxshift_pending_txs';
+    // ======= TRANSACTION STORAGE (Pending + Completed) =======
+    const PENDING_KEY = 'fluxshift_pending_txs';
+    const COMPLETED_KEY = 'fluxshift_completed_txs';
     
+    // Pending transactions
     function savePendingTx(tx) {
         try {
             const pending = getPendingTxs();
             pending.push(tx);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(pending));
+            localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
             updatePendingIndicator();
         } catch (e) { console.warn('Error saving pending tx:', e); }
     }
     
     function getPendingTxs() {
         try {
-            const data = localStorage.getItem(STORAGE_KEY);
+            const data = localStorage.getItem(PENDING_KEY);
             return data ? JSON.parse(data) : [];
         } catch (e) { return []; }
     }
     
-    function removePendingTx(burnTxHash) {
+    function removePendingTx(burnTxHash, moveToCompleted = false) {
         try {
-            const pending = getPendingTxs().filter(tx => tx.burnTxHash !== burnTxHash);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(pending));
+            const pending = getPendingTxs();
+            const tx = pending.find(t => t.burnTxHash === burnTxHash);
+            
+            // Move to completed if requested
+            if (moveToCompleted && tx) {
+                saveCompletedTx({ ...tx, status: 'completed', completedAt: Date.now() });
+            }
+            
+            const remaining = pending.filter(t => t.burnTxHash !== burnTxHash);
+            localStorage.setItem(PENDING_KEY, JSON.stringify(remaining));
             updatePendingIndicator();
         } catch (e) { console.warn('Error removing pending tx:', e); }
     }
@@ -474,10 +704,36 @@
             const idx = pending.findIndex(tx => tx.burnTxHash === burnTxHash);
             if (idx >= 0) {
                 pending[idx] = { ...pending[idx], ...updates };
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(pending));
+                localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
             }
             updatePendingIndicator();
         } catch (e) { console.warn('Error updating pending tx:', e); }
+    }
+    
+    // Completed transactions
+    function saveCompletedTx(tx) {
+        try {
+            const completed = getCompletedTxs();
+            // Avoid duplicates
+            if (!completed.find(t => t.burnTxHash === tx.burnTxHash)) {
+                completed.unshift(tx); // Add to beginning
+                // Keep only last 50 transactions
+                if (completed.length > 50) completed.pop();
+                localStorage.setItem(COMPLETED_KEY, JSON.stringify(completed));
+            }
+        } catch (e) { console.warn('Error saving completed tx:', e); }
+    }
+    
+    function getCompletedTxs() {
+        try {
+            const data = localStorage.getItem(COMPLETED_KEY);
+            return data ? JSON.parse(data) : [];
+        } catch (e) { return []; }
+    }
+    
+    function clearCompletedTxs() {
+        localStorage.setItem(COMPLETED_KEY, JSON.stringify([]));
+        showHistoryModal();
     }
     
     function updatePendingIndicator() {
@@ -490,8 +746,9 @@
         }
     }
     
+    // ======= PENDING MODAL (Action Needed) =======
     function showPendingModal() {
-        const pending = getPendingTxs();
+        const pending = getPendingTxs().filter(tx => tx.status === 'ready_to_mint');
         const listEl = $('pendingList');
         const noMsgEl = $('noPendingMsg');
         
@@ -504,27 +761,19 @@
             
             listEl.innerHTML = pending.map(tx => {
                 const direction = tx.direction === 'arc-to-sepolia' ? 'Arc → Sepolia' : 'Sepolia → Arc';
-                const statusColor = tx.status === 'ready_to_mint' ? 'green' : 'yellow';
-                const statusText = tx.status === 'ready_to_mint' ? 'Ready to Mint' : 'Waiting Attestation';
                 const timeAgo = getTimeAgo(tx.timestamp);
                 
                 return `
-                    <div class="p-3 bg-slate-800/50 rounded-lg border border-${statusColor}-500/30">
+                    <div class="p-3 bg-slate-800/50 rounded-lg border border-green-500/30">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-white font-medium text-sm">${tx.amount} USDC</span>
-                            <span class="text-${statusColor}-400 text-xs">${statusText}</span>
+                            <span class="text-green-400 text-xs">Ready to Mint</span>
                         </div>
                         <p class="text-gray-500 text-xs">${direction}</p>
                         <p class="text-gray-600 text-xs">${timeAgo}</p>
-                        ${tx.status === 'ready_to_mint' ? `
-                            <button onclick="resumeMint('${tx.burnTxHash}')" class="mt-2 w-full px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-all">
-                                🪙 Complete Mint
-                            </button>
-                        ` : `
-                            <button onclick="checkAttestation('${tx.burnTxHash}')" class="mt-2 w-full px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-all">
-                                🔄 Check Status
-                            </button>
-                        `}
+                        <button onclick="resumeMint('${tx.burnTxHash}')" class="mt-2 w-full px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-all">
+                            🪙 Complete Mint
+                        </button>
                     </div>
                 `;
             }).join('');
@@ -535,6 +784,118 @@
     
     function hidePendingModal() {
         $('pendingModal').classList.add('hidden');
+    }
+    
+    // ======= HISTORY MODAL =======
+    let currentHistoryTab = 'pending';
+    
+    function showHistoryModal() {
+        showHistoryTab(currentHistoryTab);
+        $('historyModal').classList.remove('hidden');
+    }
+    
+    function hideHistoryModal() {
+        $('historyModal').classList.add('hidden');
+    }
+    
+    function showHistoryTab(tab) {
+        currentHistoryTab = tab;
+        const pending = getPendingTxs();
+        const completed = getCompletedTxs();
+        
+        // Update tab styles
+        $('historyTabPending').className = tab === 'pending' 
+            ? 'flex-1 px-3 py-2 rounded-lg text-sm font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'
+            : 'flex-1 px-3 py-2 rounded-lg text-sm font-medium bg-slate-800 text-gray-400 border border-gray-700';
+        $('historyTabCompleted').className = tab === 'completed'
+            ? 'flex-1 px-3 py-2 rounded-lg text-sm font-medium bg-green-500/20 text-green-300 border border-green-500/30'
+            : 'flex-1 px-3 py-2 rounded-lg text-sm font-medium bg-slate-800 text-gray-400 border border-gray-700';
+        
+        // Show/hide lists
+        $('historyPendingList').classList.toggle('hidden', tab !== 'pending');
+        $('historyCompletedList').classList.toggle('hidden', tab !== 'completed');
+        $('historyNoPending').classList.add('hidden');
+        $('historyNoCompleted').classList.add('hidden');
+        $('clearCompletedBtn').classList.add('hidden');
+        
+        if (tab === 'pending') {
+            if (pending.length === 0) {
+                $('historyNoPending').classList.remove('hidden');
+            } else {
+                $('historyPendingList').innerHTML = pending.map(tx => {
+                    const direction = tx.direction === 'arc-to-sepolia' ? 'Arc → Sepolia' : 'Sepolia → Arc';
+                    const statusColor = tx.status === 'ready_to_mint' ? 'green' : 'yellow';
+                    const statusText = tx.status === 'ready_to_mint' ? 'Ready to Mint' : 'Waiting...';
+                    const timeAgo = getTimeAgo(tx.timestamp);
+                    
+                    return `
+                        <div class="p-3 bg-slate-800/50 rounded-lg border border-${statusColor}-500/30">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-white font-medium text-sm">${tx.amount} USDC</span>
+                                <span class="text-${statusColor}-400 text-xs">${statusText}</span>
+                            </div>
+                            <p class="text-gray-500 text-xs">${direction} • ${timeAgo}</p>
+                            ${tx.status === 'ready_to_mint' ? `
+                                <button onclick="hideHistoryModal(); resumeMint('${tx.burnTxHash}')" class="mt-2 w-full px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-xs font-medium transition-all">
+                                    Complete Mint
+                                </button>
+                            ` : `
+                                <button onclick="checkAttestationFromHistory('${tx.burnTxHash}')" class="mt-2 w-full px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-medium transition-all">
+                                    Check Status
+                                </button>
+                            `}
+                        </div>
+                    `;
+                }).join('');
+            }
+        } else {
+            if (completed.length === 0) {
+                $('historyNoCompleted').classList.remove('hidden');
+            } else {
+                $('clearCompletedBtn').classList.remove('hidden');
+                $('historyCompletedList').innerHTML = completed.map(tx => {
+                    const direction = tx.direction === 'arc-to-sepolia' ? 'Arc → Sepolia' : 'Sepolia → Arc';
+                    const completedTime = tx.completedAt ? getTimeAgo(tx.completedAt) : getTimeAgo(tx.timestamp);
+                    
+                    return `
+                        <div class="p-3 bg-slate-800/50 rounded-lg border border-green-500/20">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-white font-medium text-sm">${tx.amount} USDC</span>
+                                <span class="text-green-400 text-xs">✓ Completed</span>
+                            </div>
+                            <p class="text-gray-500 text-xs">${direction} • ${completedTime}</p>
+                            <p class="text-gray-600 text-xs font-mono truncate">${tx.burnTxHash}</p>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+    }
+    
+    async function checkAttestationFromHistory(burnTxHash) {
+        const tx = getPendingTxs().find(t => t.burnTxHash === burnTxHash);
+        if (!tx) return;
+        
+        try {
+            const url = `${CONFIG.ATTESTATION_API}/${tx.sourceDomain}?transactionHash=${burnTxHash}`;
+            const res = await fetch(url);
+            if (res.ok) {
+                const data = await res.json();
+                if (data?.messages?.[0]?.status === 'complete' && data.messages[0].attestation) {
+                    updatePendingTx(burnTxHash, {
+                        status: 'ready_to_mint',
+                        message: data.messages[0].message,
+                        attestation: data.messages[0].attestation
+                    });
+                    alert('✅ Attestation ready! You can now complete the mint.');
+                    showHistoryTab('pending');
+                } else {
+                    alert(`Status: ${data?.messages?.[0]?.status || 'pending'}\nStill waiting...`);
+                }
+            }
+        } catch (e) {
+            alert('Error checking: ' + e.message);
+        }
     }
     
     function getTimeAgo(timestamp) {
@@ -565,8 +926,12 @@
         bridgeDirection = tx.direction;
         updateNetworkUI();
         
-        // Show bridge tab and progress
-        $('bridgeTab').click();
+        // Show bridge section
+        showBridge();
+        
+        // Hide form, show progress
+        $('connectWalletBtn').classList.add('hidden');
+        $('walletInfo').classList.remove('hidden');
         $('bridgeForm').classList.add('hidden');
         $('bridgeProgress').classList.remove('hidden');
         
@@ -633,8 +998,8 @@
                 await mintOnArc(currentPendingTx.message, currentPendingTx.attestation);
             }
             
-            // Remove from pending
-            removePendingTx(currentPendingTx.burnTxHash);
+            // Move to completed history
+            removePendingTx(currentPendingTx.burnTxHash, true);
             currentPendingTx = null;
             
             setProgress(100, '✅ Bridge completed!');
@@ -642,8 +1007,21 @@
             setTimeout(resetBridge, 4000);
         } catch (e) {
             console.error('Manual mint error:', e);
+            const errorMsg = e?.message || String(e);
+            
+            // If message was already processed, move to completed
+            if (errorMsg.includes('already been processed') || errorMsg.includes('Nonce already used')) {
+                removePendingTx(currentPendingTx.burnTxHash, true);
+                currentPendingTx = null;
+                setProgress(100, '✅ Tokens already in your wallet!');
+                $('successMessage').classList.remove('hidden');
+                $('mintReadySection').classList.add('hidden');
+                setTimeout(resetBridge, 4000);
+                return;
+            }
+            
             $('errorMessage').classList.remove('hidden');
-            $('errorDetail').textContent = (e?.message || e).slice(0, 2000);
+            $('errorDetail').textContent = errorMsg.slice(0, 2000);
             $('mintReadySection').classList.remove('hidden');
         }
     }
@@ -897,6 +1275,9 @@
             const shortAddr = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
             $('walletShort').textContent = shortAddr;
             $('walletIndicator').classList.remove('hidden');
+            
+            // Hide header connect button (wallet indicator shows the address)
+            $('headerConnectBtn').classList.add('hidden');
 
             // show form
             $('bridgeForm').classList.remove('hidden');
@@ -953,7 +1334,7 @@
                 // Auto-mint on Sepolia
                 await mintOnSepolia(att.message, att.attestation);
                 
-                removePendingTx(burnTxHash);
+                removePendingTx(burnTxHash, true); // Move to completed history
                 setProgress(100, '✅ Bridge completed!');
                 $('successMessage').classList.remove('hidden');
                 setTimeout(resetBridge, 4000);
@@ -1533,43 +1914,51 @@
         setProgress(80, 'Switching to Arc Testnet...');
         updateStepStatus('step4','pending');
         try {
+            // Refresh provider first
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            
             // switch network to Arc
-            try {
-                await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{ chainId: CONFIG.ARC.CHAIN_ID_HEX }] });
-            } catch (swErr) {
-                if (swErr.code === 4902 || swErr.message?.includes('Unrecognized chain') || swErr.message?.includes('wallet_addEthereumChain')) {
-                    setProgress(80, 'Adding Arc Testnet network to wallet...');
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_addEthereumChain',
-                            params: [{
-                                chainId: CONFIG.ARC.CHAIN_ID_HEX,
-                                chainName: CONFIG.ARC.NAME,
-                                rpcUrls: ['https://rpc-testnet.arcscan.net'],
-                                nativeCurrency: { name:'tUSDC', symbol:'USDC', decimals: 18 },
-                                blockExplorerUrls: [CONFIG.ARC.EXPLORER]
-                            }]
-                        });
-                        await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{ chainId: CONFIG.ARC.CHAIN_ID_HEX }] });
-                    } catch (addErr) {
-                        throw new Error('Please add Arc Testnet to your wallet manually:\n\nNetwork: Arc Testnet\nRPC: https://rpc-testnet.arcscan.net\nChain ID: 1660000000026\nSymbol: USDC\nExplorer: https://testnet.arcscan.net');
+            const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+            if (currentChainId !== CONFIG.ARC.CHAIN_ID_HEX) {
+                try {
+                    await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{ chainId: CONFIG.ARC.CHAIN_ID_HEX }] });
+                } catch (swErr) {
+                    if (swErr.code === 4902 || swErr.message?.includes('Unrecognized chain') || swErr.message?.includes('wallet_addEthereumChain')) {
+                        setProgress(80, 'Adding Arc Testnet network to wallet...');
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: CONFIG.ARC.CHAIN_ID_HEX,
+                                    chainName: CONFIG.ARC.NAME,
+                                    rpcUrls: [CONFIG.ARC.RPC],
+                                    nativeCurrency: { name:'tUSDC', symbol:'USDC', decimals: 18 },
+                                    blockExplorerUrls: [CONFIG.ARC.EXPLORER]
+                                }]
+                            });
+                            await window.ethereum.request({ method:'wallet_switchEthereumChain', params:[{ chainId: CONFIG.ARC.CHAIN_ID_HEX }] });
+                        } catch (addErr) {
+                            throw new Error('Please add Arc Testnet to your wallet manually:\n\nNetwork: Arc Testnet\nRPC: ' + CONFIG.ARC.RPC + '\nChain ID: 5042002\nSymbol: USDC\nExplorer: ' + CONFIG.ARC.EXPLORER);
+                        }
+                    } else if (swErr.code === 4001) {
+                        throw new Error('Network switch rejected. Please approve the network switch to continue.');
+                    } else {
+                        throw new Error('Failed to switch to Arc: ' + (swErr.message || swErr));
                     }
-                } else if (swErr.code === 4001) {
-                    throw new Error('Network switch rejected. Please approve the network switch to continue.');
-                } else {
-                    throw new Error('Failed to switch to Arc: ' + (swErr.message || swErr));
                 }
             }
             
             await new Promise(r => setTimeout(r, 1000));
             
+            // Recreate provider and signer after network switch
             provider = new ethers.providers.Web3Provider(window.ethereum);
             signer = provider.getSigner();
             
             // Verify we're on Arc network
             const network = await provider.getNetwork();
+            console.log('Current network:', network);
             if (network.chainId !== CONFIG.ARC.CHAIN_ID) {
-                throw new Error('Wallet is not on Arc Testnet. Please switch manually and try again.');
+                throw new Error('Wallet is not on Arc Testnet (chainId: ' + network.chainId + '). Please switch manually and try again.');
             }
             
             // Check USDC balance for gas (Arc uses USDC as native gas)
@@ -1577,8 +1966,8 @@
             const gasFormatted = ethers.utils.formatEther(gasBalance);
             console.log('Arc native USDC balance (for gas):', gasFormatted);
             
-            if (gasBalance.lt(ethers.utils.parseEther('0.01'))) {
-                throw new Error('Insufficient USDC balance on Arc for gas. You need at least 0.01 USDC.\n\nGet testnet USDC at: https://faucet.circle.com');
+            if (gasBalance.lt(ethers.utils.parseEther('0.001'))) {
+                throw new Error('Insufficient USDC balance on Arc for gas. You need at least 0.001 USDC.\n\nGet testnet USDC at: https://faucet.circle.com');
             }
 
             setProgress(85, 'Calling receiveMessage on Arc...');
@@ -1620,10 +2009,14 @@
             let gasLimit = 500000;
             try {
                 const estimated = await transmitter.estimateGas.receiveMessage(msgBytes, attBytes);
-                gasLimit = estimated.mul(130).div(100);
+                gasLimit = estimated.mul(150).div(100); // 50% buffer
                 console.log('Estimated gas:', estimated.toString());
             } catch (estErr) {
                 console.warn('Gas estimation failed:', estErr);
+                // Check if message was already processed
+                if (estErr.message?.includes('Nonce already used') || estErr.message?.includes('already received')) {
+                    throw new Error('This message has already been processed. Tokens should already be in your wallet.');
+                }
             }
 
             const mintTx = await transmitter.receiveMessage(msgBytes, attBytes, { gasLimit });
@@ -1650,9 +2043,7 @@
     $('startBridgeBtn').addEventListener('click', executeBridge);
     $('swapNetworksBtn').addEventListener('click', swapNetworks);
 
-    // tabs
-    $('trackerTab').addEventListener('click', ()=> { $('trackerTab').classList.add('tab-active'); $('bridgeTab').classList.remove('tab-active'); $('trackerSection').classList.remove('hidden'); $('bridgeSection').classList.add('hidden'); });
-    $('bridgeTab').addEventListener('click', ()=> { $('bridgeTab').classList.add('tab-active'); $('trackerTab').classList.remove('tab-active'); $('bridgeSection').classList.remove('hidden'); $('trackerSection').classList.add('hidden'); });
+    // tabs - removed (new UI doesn't use tabs)
 
     // init
     resetProgressUI();
