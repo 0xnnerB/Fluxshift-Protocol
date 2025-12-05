@@ -30,6 +30,18 @@
             z-index: -2;
         }
         
+        /* Dark Overlay */
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.7) 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
+        
         /* FLUXSHIFT Neon Logo - Header */
         .flux-cyan {
             color: #00d4ff;
@@ -40,15 +52,10 @@
             text-shadow: 0 0 10px #d946ef, 0 0 20px #d946ef, 0 0 30px #d946ef;
         }
         
-        /* Hero Title - White Neon (mais discreto) */
+        /* Hero Title - White Neon */
         .hero-title-white {
             color: #ffffff;
             text-shadow: 0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px rgba(255, 255, 255, 0.3);
-        }
-        
-        /* Hero Title Glow */
-        .hero-title {
-            text-shadow: 0 0 40px rgba(0, 212, 255, 0.5), 0 0 80px rgba(217, 70, 239, 0.3);
         }
         
         /* Button Styles */
@@ -91,13 +98,6 @@
             width: 100%;
         }
         
-        /* Tracker Card */
-        .tracker-card {
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
         /* Bridge Section (hidden by default) */
         .bridge-panel {
             background: rgba(15, 15, 25, 0.95);
@@ -110,12 +110,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-fadeIn { animation: fadeIn 0.6s ease-out; }
-        
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(50px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        .animate-slideIn { animation: slideIn 0.6s ease-out; }
         
         @keyframes pulse-glow {
             0%, 100% { box-shadow: 0 0 20px rgba(147, 51, 234, 0.3); }
@@ -163,22 +157,10 @@
 </head>
 <body>
     <!-- Video Background -->
-    <video id="bgVideo" autoplay muted loop playsinline preload="auto" class="video-bg">
-        <source src="FUNDO_DO_SITE_FLUX.mp4" type="video/mp4">
-        Your browser does not support the video tag.
+    <video autoplay muted loop playsinline class="video-bg">
+        <source src="https://res.cloudinary.com/dhhxouhta/video/upload/v1764965992/freepik__create-two-technological-portals-with-futuristic-c__17638_tkmeyp.mp4" type="video/mp4">
     </video>
-    
-    <script>
-    // Force video to play on load
-    document.addEventListener('DOMContentLoaded', function() {
-        const video = document.getElementById('bgVideo');
-        if (video) {
-            video.play().catch(function(error) {
-                console.log('Video autoplay failed:', error);
-            });
-        }
-    });
-    </script>
+    <div class="video-overlay"></div>
     
     <!-- Header Navigation -->
     <header class="fixed top-0 left-0 right-0 z-50 px-8 md:px-16 lg:px-24 xl:px-32 py-4">
@@ -261,59 +243,6 @@
                             </svg>
                             Learn More
                         </a>
-                    </div>
-                </div>
-                
-                <!-- Right Side - Tracker Interface -->
-                <div class="animate-slideIn flex justify-center lg:justify-end">
-                    <div class="tracker-card rounded-2xl p-6 w-full max-w-lg">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-white font-semibold text-lg">Transaction Tracker</h3>
-                        </div>
-                        
-                        <!-- Tracker Input -->
-                        <div class="space-y-4">
-                            <div class="flex gap-3">
-                                <input id="addressInput" type="text" placeholder="Enter address (0x...)" 
-                                    class="flex-1 px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-purple-500/50 focus:outline-none transition-all text-sm"/>
-                                <button id="searchBtn" class="px-5 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:opacity-90 transition-all text-sm">
-                                    Search
-                                </button>
-                            </div>
-                            
-                            <div id="errorBox" class="hidden items-center gap-2 text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/30 text-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                                <span id="errorText"></span>
-                            </div>
-                        </div>
-                        
-                        <!-- Loading -->
-                        <div id="loadingBox" class="hidden text-center py-8">
-                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent"></div>
-                            <p class="text-gray-400 mt-3 text-sm">Fetching data...</p>
-                        </div>
-                        
-                        <!-- Results -->
-                        <div id="resultsBox" class="hidden mt-4 space-y-4 animate-fadeIn">
-                            <div class="p-4 bg-black/30 rounded-xl border border-white/5">
-                                <p class="text-gray-500 text-xs mb-1">Address</p>
-                                <p id="addressDisplay" class="text-white font-mono text-xs truncate"></p>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="p-4 bg-black/30 rounded-xl border border-white/5">
-                                    <p class="text-gray-500 text-xs mb-1">Balance</p>
-                                    <p class="text-white font-semibold"><span id="balance">0</span> <span class="text-purple-400">USDC</span></p>
-                                </div>
-                                <div class="p-4 bg-black/30 rounded-xl border border-white/5">
-                                    <p class="text-gray-500 text-xs mb-1">Transactions</p>
-                                    <p id="txCount" class="text-white font-semibold">0</p>
-                                </div>
-                            </div>
-                            <div class="p-4 bg-black/30 rounded-xl border border-white/5">
-                                <p class="text-gray-500 text-xs mb-1">Last Activity</p>
-                                <p id="lastActivity" class="text-white text-sm">-</p>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1028,8 +957,6 @@
 
     // ======= UI HELPERS =======
     const $ = id => document.getElementById(id);
-    function showErrorBox(msg) { $('errorText').textContent = msg; $('errorBox').classList.remove('hidden'); }
-    function hideErrorBox() { $('errorBox').classList.add('hidden'); $('errorText').textContent = ''; }
     function setProgress(percent, message) {
         $('progressBar').style.width = percent + '%';
         $('progressPercent').textContent = Math.round(percent) + '%';
@@ -1185,32 +1112,8 @@
         $('estimatedTime').classList.add('hidden');
     }
 
-    // ======= TRACKER =======
-    async function fetchAddressData() {
-        hideErrorBox();
-        const addr = $('addressInput').value.trim();
-        if (!addr || addr.length !== 42 || !addr.startsWith('0x')) { showErrorBox('Invalid address!'); return; }
-        $('resultsBox').classList.add('hidden'); $('loadingBox').classList.remove('hidden');
-        try {
-            const rpcProvider = new ethers.providers.JsonRpcProvider(CONFIG.ARC.RPC);
-            const balanceWei = await rpcProvider.getBalance(addr);
-            const balanceEth = ethers.utils.formatEther(balanceWei);
-            const txCount = await rpcProvider.getTransactionCount(addr);
-            $('addressDisplay').textContent = addr;
-            $('balance').textContent = parseFloat(balanceEth).toFixed(4);
-            $('txCount').textContent = txCount;
-            $('lastActivity').textContent = txCount>0 ? new Date().toLocaleDateString('pt-BR') : 'Sem atividade';
-            $('loadingBox').classList.add('hidden'); $('resultsBox').classList.remove('hidden');
-        } catch (e) {
-            console.error(e);
-            $('loadingBox').classList.add('hidden');
-            showErrorBox('Error fetching data: ' + (e.message || e));
-        }
-    }
-
     // ======= CONNECT WALLET =======
     async function connectWallet() {
-        hideErrorBox();
         try {
             if (!window.ethereum) { alert('Instale MetaMask ou Rabby!'); return; }
             
@@ -1290,7 +1193,6 @@
 
     // ======= BRIDGE FLOW =======
     async function executeBridge() {
-        hideErrorBox();
         resetProgressUI();
         const rawAmount = $('bridgeAmount').value;
         if (!rawAmount || Number(rawAmount) <= 0) { alert('Please enter a valid amount!'); return; }
@@ -2037,13 +1939,9 @@
     }
 
     // ======= EVENTS =======
-    $('searchBtn').addEventListener('click', fetchAddressData);
-    $('addressInput').addEventListener('keypress', (e)=> { if (e.key === 'Enter') fetchAddressData(); });
     $('connectWalletBtn').addEventListener('click', connectWallet);
     $('startBridgeBtn').addEventListener('click', executeBridge);
     $('swapNetworksBtn').addEventListener('click', swapNetworks);
-
-    // tabs - removed (new UI doesn't use tabs)
 
     // init
     resetProgressUI();
