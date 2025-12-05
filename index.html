@@ -502,18 +502,85 @@
         </div>
     </div>
     
-    <!-- Twitter/X Icon - Bottom Right -->
-    <a href="https://x.com/FluxShift_" target="_blank" class="fixed bottom-6 right-6 z-50 social-icon">
-        <div class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all">
-            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-            </svg>
-        </div>
-    </a>
-    
-    <!-- Footer Text -->
-    <div class="fixed bottom-6 left-6 z-50">
+    <!-- Footer -->
+    <div class="fixed bottom-4 left-4 right-4 z-50 flex items-center justify-between">
+        <!-- Left: Community text -->
         <p class="text-gray-600 text-xs">From community to community S2</p>
+        
+        <!-- Right: Security Disclaimer + X -->
+        <div class="flex items-center gap-4">
+            <button onclick="toggleSecurityDisclaimer()" class="text-gray-500 hover:text-purple-400 text-xs flex items-center gap-1 transition-all">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+                Security Disclaimer
+            </button>
+            <a href="https://x.com/syntaboratory" target="_blank" class="text-gray-500 hover:text-white transition-colors">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Security Disclaimer Modal -->
+    <div id="securityDisclaimerModal" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="bg-slate-900 rounded-2xl p-6 border border-yellow-500/30 max-w-lg w-full mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <h3 class="text-yellow-500 font-bold text-lg">Security Disclaimer</h3>
+                </div>
+                <button onclick="toggleSecurityDisclaimer()" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="space-y-4 text-sm">
+                <div class="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                    <p class="text-yellow-300 font-semibold mb-1">⚠️ Web3 Interactions</p>
+                    <p class="text-gray-300">This website and its Web3 interaction features are still in development. This means that bugs, unexpected behavior, or interruptions may occur at any time.</p>
+                </div>
+                
+                <div>
+                    <p class="text-white font-semibold mb-2">To ensure your safety:</p>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-start gap-2">
+                            <span class="text-purple-400 mt-1">•</span>
+                            <span><strong class="text-white">Use a disposable wallet</strong> when interacting with any functionality of the platform during this early stage. Do not use your main wallet or store significant funds while testing.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-purple-400 mt-1">•</span>
+                            <span><strong class="text-white">Never share your private keys, seed phrase, or any sensitive information.</strong> This website will never ask for such data, and you should never provide it anywhere.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-purple-400 mt-1">•</span>
+                            <span><strong class="text-white">Always review contract permissions</strong> (approvals) and pay close attention to what you are signing.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-purple-400 mt-1">•</span>
+                            <span><strong class="text-white">Beware of fake links, phishing attempts, and impersonators.</strong> Always confirm that you are accessing the official domain of the project.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-purple-400 mt-1">•</span>
+                            <span><strong class="text-white">The project is subject to constant updates,</strong> which may modify endpoints, RPCs, and operational flows. Make sure you are using up to date versions.</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="p-3 bg-slate-800 border border-gray-700 rounded-lg">
+                    <p class="text-gray-400 text-xs">By continuing to use this website, you acknowledge and agree that you are doing so at your own risk. The team is not responsible for financial losses, technical failures, wallet misuse, or incorrect interactions with external contracts.</p>
+                </div>
+            </div>
+            
+            <button onclick="acceptDisclaimerAndConnect()" class="w-full mt-4 px-4 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-xl font-semibold hover:opacity-90 transition-all">
+                I Understand & Continue
+            </button>
+        </div>
     </div>
 
     <!-- Navigation Functions -->
@@ -528,6 +595,16 @@
         document.getElementById('homeSection').classList.add('hidden');
         document.getElementById('bridgeSection').classList.remove('hidden');
         document.getElementById('launchAppBtn').classList.add('hidden');
+    }
+    
+    function toggleDisclaimer() {
+        const modal = document.getElementById('disclaimerModal');
+        modal.classList.toggle('hidden');
+    }
+    
+    function toggleSecurityDisclaimer() {
+        const modal = document.getElementById('securityDisclaimerModal');
+        modal.classList.toggle('hidden');
     }
     </script>
 
@@ -1113,7 +1190,31 @@
     }
 
     // ======= CONNECT WALLET =======
+    // Flag to track if user accepted disclaimer
+    let disclaimerAccepted = localStorage.getItem('fluxshift_disclaimer_accepted') === 'true';
+    
     async function connectWallet() {
+        // Show security disclaimer first if not accepted
+        if (!disclaimerAccepted) {
+            showSecurityDisclaimerForConnect();
+            return;
+        }
+        
+        await doConnectWallet();
+    }
+    
+    function showSecurityDisclaimerForConnect() {
+        document.getElementById('securityDisclaimerModal').classList.remove('hidden');
+    }
+    
+    function acceptDisclaimerAndConnect() {
+        disclaimerAccepted = true;
+        localStorage.setItem('fluxshift_disclaimer_accepted', 'true');
+        document.getElementById('securityDisclaimerModal').classList.add('hidden');
+        doConnectWallet();
+    }
+    
+    async function doConnectWallet() {
         try {
             if (!window.ethereum) { alert('Instale MetaMask ou Rabby!'); return; }
             
